@@ -103,21 +103,21 @@ INSERT INTO users (nama, username, password, role) VALUES
 -- Satuan Kerja
 INSERT INTO satker (nama) VALUES
 ('Kantor Wilayah'),
-('Lapas Kelas I Surabaya'),
-('Lapas Kelas II A Malang'),
-('Rutan Kelas I Surabaya'),
-('Bapas Kelas I Surabaya'),
-('Lapas Perempuan Malang');
+('Lapas Kelas IIA Pekanbaru'),
+('Lapas Kelas IIA Bangkinang'),
+('Rutan Kelas I Pekanbaru'),
+('Bapas Kelas I Pekanbaru'),
+('Lapas Perempuan Kelas IIA Pekanbaru');
 
 -- Pegawai
 INSERT INTO pegawai (nip, nama, jabatan, golongan, satker_id, tmt_pns, status) VALUES
-('198501012010011001', 'Budi Santoso, S.H.',  'Kepala Seksi',       'III/c', 1, '2010-01-01', 'Aktif'),
-('197808152005012002', 'Dewi Rahayu, M.M.',   'Kepala Sub Bagian',  'III/d', 1, '2005-01-12', 'Aktif'),
+('198501012010011001', 'Yeni Eka, S.H.',  'Kepala Seksi',       'III/c', 1, '2010-01-01', 'Aktif'),
+('197808152005012002', 'Yuda Aja, M.M.',   'Kepala Sub Bagian',  'III/d', 1, '2005-01-12', 'Aktif'),
 ('199002282015031003', 'Ahmad Fauzan',         'Staf Pelaksana',     'II/c',  2, '2015-03-28', 'Aktif'),
-('198312122008011004', 'Sri Wahyuni, S.Pd.',   'Penyuluh',           'III/b', 5, '2008-01-12', 'Aktif'),
+('198312122008011004', 'Yeni Lagi, S.Pd.',   'Penyuluh',           'III/b', 5, '2008-01-12', 'Aktif'),
 ('197603182000031005', 'Heru Wibowo',          'Kepala Rutan',       'IV/a',  4, '2000-03-18', 'Aktif'),
-('196809251990011006', 'Suparman, S.H.',       'Kepala Lapas',       'IV/b',  3, '1990-01-25', 'Pensiun'),
-('199507082020122007', 'Rizky Amelia, S.T.',   'Pranata Komputer',   'III/a', 1, '2020-12-08', 'Aktif'),
+('196809251990011006', 'Yeni Lagi, S.H.',       'Kepala Lapas',       'IV/b',  3, '1990-01-25', 'Pensiun'),
+('199507082020122007', 'Mifta Aja, S.T.',   'Pranata Komputer',   'III/a', 1, '2020-12-08', 'Aktif'),
 ('200101012022031008', 'Muhammad Haikal',      'CPNS',               'II/a',  6, '2022-03-01', 'Dalam Proses');
 
 -- Kenaikan Gaji Berkala
