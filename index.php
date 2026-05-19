@@ -12,7 +12,7 @@ $user = currentUser();
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SIPATEN - Sistem Informasi Pegawai Tenaga Negeri</title>
+<title>SIPATEN - Sistem Penyimpanan Arsip Kepegawaian Terintegrasi dan Nyaman</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -148,7 +148,7 @@ $user = currentUser();
     </div>
     <div class="logo-text">
       <div class="brand">SIPATEN</div>
-      <div class="tagline">Sistem Informasi Pegawai Tenaga Negeri</div>
+      <div class="tagline">Sistem Penyimpanan Arsip Kepegawaian Terintegrasi dan Nyaman</div>
     </div>
   </div>
   <div class="header-right">
@@ -164,7 +164,7 @@ $user = currentUser();
 <div id="page-home" class="page active">
   <div class="hero">
     <h1>Selamat Datang, <?= htmlspecialchars($user['nama'] ?? 'Admin') ?></h1>
-    <h2>Sistem Informasi Pegawai Tenaga Negeri</h2>
+    <h2>Sistem Penyimpanan Arsip Kepegawaian Terintegrasi dan Nyaman</h2>
     <div class="search-box">
       <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
       <input type="text" id="search-input" placeholder="Cari nama pegawai atau NIP..." oninput="handleSearch(this.value)" autocomplete="off">
