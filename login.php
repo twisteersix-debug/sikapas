@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login — SIPATEN</title>
+<title>Login — SIYENIAJA</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="logo">
     <div class="emblem">🏛️</div>
     <div>
-      <div class="brand">SIPATEN</div>
+      <div class="brand">SIYENIAJA</div>
       <div class="tagline">Sistem Penyimpanan Arsip Kepegawaian Terintegrasi dan Nyaman</div>
     </div>
   </div>
