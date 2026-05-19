@@ -17,21 +17,38 @@ define('SESSION_LIFETIME', 3600 * 8);
 function getDB(): PDO {
     static $pdo = null;
     if ($pdo === null) {
-        $dsn  = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=%s',
-                        DB_HOST, DB_PORT, DB_NAME, DB_CHARSET);
+        // Coba pakai MYSQL_URL jika tersedia
+        $url = getenv('MYSQL_URL') ?: getenv('MYSQL_PUBLIC_URL') ?: '';
+        if ($url) {
+            $parsed = parse_url($url);
+            $host   = $parsed['host'];
+            $port   = $parsed['port'] ?? 3306;
+            $dbname = ltrim($parsed['path'], '/');
+            $user   = $parsed['user'];
+            $pass   = $parsed['pass'];
+        } else {
+            $host   = DB_HOST;
+            $port   = DB_PORT;
+            $dbname = DB_NAME;
+            $user   = DB_USER;
+            $pass   = DB_PASS;
+        }
+        
+        $dsn  = "mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4";
         $opts = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES   => false,
         ];
         try {
-            $pdo = new PDO($dsn, DB_USER, DB_PASS, $opts);
+            $pdo = new PDO($dsn, $user, $pass, $opts);
         } catch (PDOException $e) {
             http_response_code(500);
             die(json_encode(['success'=>false,'message'=>'DB error: '.$e->getMessage()]));
         }
     }
     return $pdo;
+}
 }
 
 function startSession(): void {
