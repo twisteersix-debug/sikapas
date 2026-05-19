@@ -138,14 +138,9 @@ $user = currentUser();
 
 <!-- HEADER -->
 <header>
-  <div class="logo">
-    <div class="logo-emblem">
-      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="32" height="32" rx="6" fill="#1a2e5a"/>
-        <path d="M16 4L28 10V22L16 28L4 22V10L16 4Z" stroke="#fff" stroke-width="1.5" fill="none"/>
-        <circle cx="16" cy="16" r="5" stroke="#fff" stroke-width="1.5" fill="none"/>
-      </svg>
-    </div>
+  <div class="logo-emblem">
+  <img src="logo.png" alt="SIPATEN" style="width:42px;height:42px;object-fit:contain;border-radius:50%;">
+</div>
     <div class="logo-text">
       <div class="brand">SIPATEN</div>
       <div class="tagline">Sistem Penyimpanan Arsip Kepegawaian Terintegrasi dan Nyaman</div>
