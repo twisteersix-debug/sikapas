@@ -72,7 +72,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
 <div class="card">
   <div class="logo">
-    <div class="emblem">🏛️</div>
+    <div class="emblem" style="background:none;padding:0">
+  <img src="logo.png" alt="SIPATEN" style="width:48px;height:48px;object-fit:contain;">
+</div>
     <div>
       <div class="brand">SIYENIAJA</div>
       <div class="tagline">Sistem Penyimpanan Arsip Kepegawaian Terintegrasi dan Nyaman</div>
