@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="emblem">🏛️</div>
     <div>
       <div class="brand">SIPATEN</div>
-      <div class="tagline">Sistem Informasi Pegawai Tenaga Negeri</div>
+      <div class="tagline">Sistem Penyimpanan Arsip Kepegawaian Terintegrasi dan Nyaman</div>
     </div>
   </div>
   <h2>Masuk ke Sistem</h2>
