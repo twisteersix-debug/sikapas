@@ -1,0 +1,13 @@
+# Uploads (jangan di-commit ke Git)
+uploads/dokumen/*
+!uploads/dokumen/.gitkeep
+
+# Log files
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment file lokal
+.env
