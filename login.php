@@ -96,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
     <button type="submit" class="btn">Masuk</button>
   </form>
-  <div class="hint">Default: admin / admin123</div>
+  <div class="hint">Default: Harus Ganteng / Cantik</div>
 </div>
 </body>
 </html>
