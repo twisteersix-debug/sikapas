@@ -74,7 +74,12 @@ if ($act === 'hapus') {
         $success = 'User berhasil dihapus.';
     }
 }
-
+if ($act === 'reset_pass') {
+    $id = $_POST['id'] ?? '';
+    $hash = password_hash('sipaten123', PASSWORD_BCRYPT);
+    $db->prepare("UPDATE users SET password=? WHERE id=?")->execute([$hash, $id]);
+    $success = 'Password berhasil direset ke default: sipaten123';
+}
 $users = $db->query("SELECT id, nama, username, role, created_at FROM users ORDER BY created_at DESC")->fetchAll();
 ?>
 <!DOCTYPE html>
@@ -229,11 +234,16 @@ $users = $db->query("SELECT id, nama, username, role, created_at FROM users ORDE
           <td style="white-space:nowrap;display:flex;gap:6px">
             <button class="btn btn-sm btn-outline" onclick="openEdit(<?= htmlspecialchars(json_encode($u)) ?>)">Edit</button>
             <?php if ($u['id'] != $_SESSION['user_id']): ?>
-            <form method="POST" onsubmit="return confirm('Hapus user <?= htmlspecialchars($u['username']) ?>?')">
-              <input type="hidden" name="act" value="hapus">
-              <input type="hidden" name="id" value="<?= $u['id'] ?>">
-              <button type="submit" class="btn btn-danger">Hapus</button>
-            </form>
+            <form method="POST" onsubmit="return confirm('Reset password <?= htmlspecialchars($u['username']) ?> ke default?')" style="display:inline">
+  <input type="hidden" name="act" value="reset_pass">
+  <input type="hidden" name="id" value="<?= $u['id'] ?>">
+  <button type="submit" class="btn btn-sm" style="background:#fef3dd;color:#8a5500;border:1px solid #f0d080">Reset Pass</button>
+</form>
+<form method="POST" onsubmit="return confirm('Hapus user <?= htmlspecialchars($u['username']) ?>?')" style="display:inline">
+  <input type="hidden" name="act" value="hapus">
+  <input type="hidden" name="id" value="<?= $u['id'] ?>">
+  <button type="submit" class="btn btn-danger">Hapus</button>
+</form>
             <?php else: ?>
             <span style="font-size:12px;color:var(--gray-400);padding:5px">Anda</span>
             <?php endif; ?>
