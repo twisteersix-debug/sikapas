@@ -194,6 +194,27 @@ $user = currentUser();
         <div class="icon-wrap"><svg viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg></div>
         <span class="menu-label">Arsip File</span>
       </div>
+     <?php if (isAdmin()): ?>
+<div class="menu-card" onclick="window.location.href='users.php'">
+  <div class="icon-wrap">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+  </div>
+  <span class="menu-label">Kelola User</span>
+</div>
+<div class="menu-card" onclick="window.location.href='profile.php'">
+  <div class="icon-wrap">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+  </div>
+  <span class="menu-label">Profil Saya</span>
+</div>
+<?php else: ?>
+<div class="menu-card" onclick="window.location.href='profile.php'">
+  <div class="icon-wrap">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+  </div>
+  <span class="menu-label">Profil Saya</span>
+</div>
+<?php endif; ?>
     </div>
   </main>
 </div>
