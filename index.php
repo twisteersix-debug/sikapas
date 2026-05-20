@@ -147,9 +147,10 @@ $user = currentUser();
     </div>
   </div>
   <div class="header-right">
-    <div class="user-badge">
-      <div class="user-avatar"><?= htmlspecialchars($user['inisial'] ?? 'A') ?></div>
-      <span class="user-name"><?= htmlspecialchars($user['nama'] ?? 'Admin') ?></span>
+    <a href="profile.php" class="user-badge">
+  <div class="user-avatar"><?= htmlspecialchars($user['inisial'] ?? 'A') ?></div>
+  <span class="user-name"><?= htmlspecialchars($user['nama'] ?? 'Admin') ?></span>
+</a>
     </div>
     <a href="logout.php" class="btn-logout">Keluar</a>
   </div>
