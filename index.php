@@ -216,6 +216,12 @@ $user = currentUser();
   </div>
   <span class="menu-label">Kelola User</span>
 </div>
+     <div class="menu-card" onclick="window.location.href='satker.php'">
+  <div class="icon-wrap">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+  </div>
+  <span class="menu-label">Kelola Satker</span>
+</div>
 <div class="menu-card" onclick="window.location.href='profile.php'">
   <div class="icon-wrap">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
@@ -245,6 +251,9 @@ $user = currentUser();
     <div class="table-wrapper">
       <div class="table-toolbar">
         <span style="font-size:14px;font-weight:700;color:var(--navy)">Daftar Satuan Kerja</span>
+<?php if(canEdit()):?>
+<a href="satker.php" style="padding:6px 14px;background:var(--blue);color:#fff;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">⚙️ Kelola Satker</a>
+<?php endif;?>
       </div>
       <table><thead><tr><th>No</th><th>Satuan Kerja</th><th>Total</th><th>Aktif</th></tr></thead>
         <tbody id="satker-tbody"><tr><td colspan="4" class="loading">Memuat...</td></tr></tbody>
