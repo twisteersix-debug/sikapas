@@ -1,6 +1,6 @@
 <?php
 // ============================================================
-//  SIPATEN — Konfigurasi Database & Session
+//  SIPATEN — Konfigurasi Database & Session v2.0
 // ============================================================
 
 define('DB_HOST',    getenv('MYSQLHOST')     ?: 'mysql.railway.internal');
@@ -77,7 +77,7 @@ function requireLogin(): void {
 
 function requireAdmin(): void {
     requireLogin();
-    if (($_SESSION['user']['role'] ?? '') !== 'admin') {
+    if (!isAdmin()) {
         if (isAjax()) {
             http_response_code(403);
             die(json_encode(['success'=>false,'message'=>'Hanya admin.']));
@@ -87,8 +87,24 @@ function requireAdmin(): void {
     }
 }
 
+function requireOperator(): void {
+    requireLogin();
+    if (isViewer()) {
+        if (isAjax()) {
+            http_response_code(403);
+            die(json_encode(['success'=>false,'message'=>'Akses ditolak.']));
+        }
+        header('Location: index.php');
+        exit;
+    }
+}
+
 function currentUser(): array  { return $_SESSION['user'] ?? []; }
 function isAdmin(): bool       { return ($_SESSION['user']['role'] ?? '') === 'admin'; }
+function isOperator(): bool    { return ($_SESSION['user']['role'] ?? '') === 'operator'; }
+function isViewer(): bool      { return ($_SESSION['user']['role'] ?? '') === 'viewer'; }
+function isPegawai(): bool     { return ($_SESSION['user']['role'] ?? '') === 'pegawai'; }
+function canEdit(): bool       { return isAdmin() || isOperator(); }
 function isAjax(): bool        { return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'; }
 
 function jsonResponse(bool $ok, string $msg, array $data=[]): void {
@@ -99,3 +115,17 @@ function jsonResponse(bool $ok, string $msg, array $data=[]): void {
 
 function sanitize(string $v): string { return htmlspecialchars(trim($v), ENT_QUOTES, 'UTF-8'); }
 function formatRupiah(float $n): string { return 'Rp '.number_format($n,0,',','.'); }
+
+// Log aktivitas
+function logActivity(string $aksi, string $modul, string $detail = ''): void {
+    try {
+        $db = getDB();
+        $uid  = $_SESSION['user_id'] ?? null;
+        $nama = $_SESSION['user']['nama'] ?? 'System';
+        $ip   = $_SERVER['REMOTE_ADDR'] ?? '';
+        $db->prepare("INSERT INTO activity_log (user_id, user_nama, aksi, modul, detail, ip_address) VALUES (?,?,?,?,?,?)")
+           ->execute([$uid, $nama, $aksi, $modul, $detail, $ip]);
+    } catch (Exception $e) {
+        // silent fail
+    }
+}
