@@ -706,7 +706,7 @@ async function loadPegawai(q='') {
   if (!res?.success) return;
   document.getElementById('pegawai-tbody').innerHTML = res.data.map(p => `
     <tr>
-      <td>${p.nip}</td><td>${p.nama}</td><td>${p.jabatan||'-'}</td>
+      <td><a href="profil_pegawai.php?id=${p.id}" style="color:var(--blue);font-weight:600;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${p.nip}</a></td><td><a href="profil_pegawai.php?id=${p.id}" style="color:var(--navy);font-weight:600;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${p.nama}</a></td><td>${p.jabatan||'-'}</td><td>${p.jabatan||'-'}</td>
       <td>${p.golongan||'-'}</td><td>${p.satker||'-'}</td>
       <td>${badge(p.status)}</td>
       <td style="white-space:nowrap">
