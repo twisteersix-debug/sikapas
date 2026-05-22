@@ -176,7 +176,7 @@ $user = currentUser();
   input[type="text"],input[type="date"],input[type="number"],select,textarea { padding:10px 14px; border:1px solid var(--gray-200); border-radius:8px; font-size:13px; font-family:inherit; color:var(--text); outline:none; transition:border-color .2s; background:#fff; }
   input:focus,select:focus,textarea:focus { border-color:var(--blue-light); }
   .form-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:1.25rem; }
-  .modal-overlay { position:fixed; inset:0; background:rgba(10,20,50,0.55); display:none; align-items:center; justify-content:center; z-index:200; }
+  .modal-overlay { position:fixed; inset:0; background:rgba(10,20,50,0.55); display:none; align-items:flex-start; justify-content:center; z-index:200; overflow-y:auto; padding:2rem 1rem; }
   .modal-overlay.open { display:flex; }
   .modal { background:var(--white); border-radius:16px; padding:2rem; width:100%; max-width:520px; box-shadow:0 20px 60px rgba(0,0,0,0.25); }
   .modal-title { font-size:18px; font-weight:700; color:var(--navy); margin-bottom:1.25rem; }
