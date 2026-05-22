@@ -506,58 +506,30 @@ $user = currentUser();
 </div>
 
 <!-- ──── MODAL TAMBAH/EDIT PEGAWAI ──── -->
+<!-- ──── MODAL TAMBAH/EDIT PEGAWAI ──── -->
 <div class="modal-overlay" id="modal-pegawai" onclick="closeModalOutside(event,'modal-pegawai')">
-  <div class="modal" style="max-width:640px;max-height:90vh;overflow-y:auto">
+  <div class="modal" style="max-width:620px;max-height:90vh;overflow-y:auto">
     <p class="modal-title" id="modal-pegawai-title">Tambah Data Pegawai Baru</p>
     <input type="hidden" id="pegawai-id">
     <div class="form-grid">
-      <div class="form-group">
-        <label>NIP</label>
-        <input type="text" id="peg-nip" placeholder="18 digit NIP">
-      </div>
-      <div class="form-group">
-        <label>Nama Lengkap</label>
-        <input type="text" id="peg-nama" placeholder="Nama dan gelar">
-      </div>
-      <div class="form-group">
-        <label>Jabatan</label>
-        <input type="text" id="peg-jabatan" placeholder="Jabatan struktural/fungsional">
-      </div>
-      <div class="form-group">
-        <label>Pangkat/Golongan</label>
-        <select id="peg-golongan"><?= golonganOptions() ?></select>
-      </div>
-      <div class="form-group">
-        <label>Unit Kerja / Satuan Kerja</label>
-        <select id="peg-satker"><option value="">Pilih Satker</option></select>
-      </div>
-      <div class="form-group">
-        <label>TMT PNS</label>
-        <input type="date" id="peg-tmt">
-      </div>
-      <div class="form-group">
-        <label>Status Pegawai</label>
+      <div class="form-group"><label>NIP</label><input type="text" id="peg-nip" placeholder="18 digit NIP"></div>
+      <div class="form-group"><label>Nama Lengkap</label><input type="text" id="peg-nama" placeholder="Nama dan gelar"></div>
+      <div class="form-group"><label>Jabatan</label><input type="text" id="peg-jabatan" placeholder="Jabatan struktural/fungsional"></div>
+      <div class="form-group"><label>Pangkat/Golongan</label><select id="peg-golongan"><?= golonganOptions() ?></select></div>
+      <div class="form-group"><label>Unit Kerja / Satker</label><select id="peg-satker"><option value="">Pilih Satker</option></select></div>
+      <div class="form-group"><label>TMT PNS</label><input type="date" id="peg-tmt"></div>
+      <div class="form-group"><label>Status Pegawai</label>
         <select id="peg-status">
           <option value="Aktif">Aktif</option>
           <option value="Pensiun">Pensiun</option>
           <option value="Dalam Proses">Dalam Proses</option>
         </select>
       </div>
-      <div class="form-group">
-        <label>Nomor Telepon</label>
-        <input type="text" id="peg-telp" placeholder="08xx-xxxx-xxxx">
-      </div>
-      <div class="form-group">
-        <label>Email</label>
-        <input type="text" id="peg-email" placeholder="email@domain.com">
-      </div>
-      <div class="form-group">
-        <label>Tanggal Lahir</label>
-        <input type="date" id="peg-tgl-lahir">
-      </div>
-      <div class="form-group" style="grid-column:1/-1">
-        <label>Alamat Lengkap</label>
-        <textarea id="peg-alamat" placeholder="Alamat lengkap pegawai..." style="padding:10px 14px;border:1px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;min-height:70px;outline:none;width:100%" onfocus="this.style.borderColor='var(--blue-light)'" onblur="this.style.borderColor='var(--gray-200)'"></textarea>
+      <div class="form-group"><label>Nomor Telepon</label><input type="text" id="peg-telp" placeholder="08xx-xxxx-xxxx"></div>
+      <div class="form-group"><label>Email</label><input type="text" id="peg-email" placeholder="email@domain.com"></div>
+      <div class="form-group"><label>Tanggal Lahir</label><input type="date" id="peg-lahir"></div>
+      <div class="form-group full"><label>Alamat Lengkap</label>
+        <textarea id="peg-alamat" rows="3" placeholder="Alamat lengkap pegawai..." style="padding:10px 14px;border:1px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;outline:none;width:100%;transition:border-color .2s" onfocus="this.style.borderColor='var(--blue-light)'" onblur="this.style.borderColor='var(--gray-200)'"></textarea>
       </div>
     </div>
     <div class="form-actions">
@@ -752,7 +724,7 @@ async function loadSatkerOptions() {
 function openModalPegawai() {
   document.getElementById('modal-pegawai-title').textContent = 'Tambah Data Pegawai Baru';
   document.getElementById('pegawai-id').value = '';
-  ['peg-nip','peg-nama','peg-jabatan','peg-tmt'].forEach(id => document.getElementById(id).value = '');
+  ['peg-nip','peg-nama','peg-jabatan','peg-tmt','peg-telp','peg-email','peg-lahir','peg-alamat'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('peg-golongan').value = '';
   document.getElementById('peg-satker').value = '';
   document.getElementById('peg-status').value = 'Aktif';
@@ -774,7 +746,7 @@ async function editPegawai(id) {
   document.getElementById('peg-status').value    = p.status;
   document.getElementById('peg-telp').value      = p.no_telepon || '';
   document.getElementById('peg-email').value     = p.email || '';
-  document.getElementById('peg-tgl-lahir').value = p.tanggal_lahir || '';
+  document.getElementById('peg-lahir').value     = p.tanggal_lahir || '';
   document.getElementById('peg-alamat').value    = p.alamat || '';
   await loadSatkerOptions();
   document.getElementById('peg-satker').value    = p.satker_id || '';
@@ -782,34 +754,27 @@ async function editPegawai(id) {
 }
 
 async function savePegawai() {
-  const nip  = document.getElementById('peg-nip').value.trim();
-  const nama = document.getElementById('peg-nama').value.trim();
-
-  if (!nip)  { toast('NIP wajib diisi', 'error'); return; }
-  if (!nama) { toast('Nama Lengkap wajib diisi', 'error'); return; }
-
   const body = {
     id:            document.getElementById('pegawai-id').value,
-    nip:           nip,
-    nama:          nama,
-    jabatan:       document.getElementById('peg-jabatan').value.trim(),
+    nip:           document.getElementById('peg-nip').value,
+    nama:          document.getElementById('peg-nama').value,
+    jabatan:       document.getElementById('peg-jabatan').value,
     golongan:      document.getElementById('peg-golongan').value,
     satker_id:     document.getElementById('peg-satker').value,
     tmt_pns:       document.getElementById('peg-tmt').value,
     status:        document.getElementById('peg-status').value,
-    no_telepon:    document.getElementById('peg-telp').value.trim(),
-    email:         document.getElementById('peg-email').value.trim(),
-    tanggal_lahir: document.getElementById('peg-tgl-lahir').value,
-    alamat:        document.getElementById('peg-alamat').value.trim(),
+    no_telepon:    document.getElementById('peg-telp').value,
+    email:         document.getElementById('peg-email').value,
+    tanggal_lahir: document.getElementById('peg-lahir').value,
+    alamat:        document.getElementById('peg-alamat').value,
   };
-
-  const res = await apiPost('pegawai', 'save', body);
+  const res = await apiPost('pegawai','save',body);
   if (res?.success) {
     closeModal('modal-pegawai');
     toast(res.message);
     loadPegawai(document.getElementById('pegawai-search').value);
   } else {
-    toast(res?.message || 'Gagal menyimpan', 'error');
+    toast(res?.message || 'Gagal menyimpan','error');
   }
 }
 
