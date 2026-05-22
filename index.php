@@ -33,12 +33,83 @@ $user = currentUser();
   .logo-text .brand { font-size:22px; font-weight:700; color:var(--white); letter-spacing:1px; }
   .logo-text .tagline { font-size:10px; color:rgba(255,255,255,0.65); font-weight:400; }
   .header-right { display:flex; align-items:center; gap:10px; }
-  .user-badge { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); border-radius:32px; padding:6px 14px 6px 8px; cursor:pointer; transition:background .2s; text-decoration:none; }
+  /* --- User Dropdown --- */
+  .user-menu { position:relative; }
+
+  .user-badge {
+    display:flex; align-items:center; gap:10px;
+    background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.2);
+    border-radius:32px; padding:6px 14px 6px 8px;
+    cursor:pointer; transition:background .2s;
+    text-decoration:none; user-select:none;
+  }
   .user-badge:hover { background:rgba(255,255,255,0.2); }
-  .user-avatar { width:32px; height:32px; border-radius:50%; background:#e87d2a; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; color:var(--white); }
+
+  .user-avatar {
+    width:32px; height:32px; border-radius:50%;
+    background:#e87d2a; display:flex; align-items:center;
+    justify-content:center; font-weight:700; font-size:14px;
+    color:var(--white); flex-shrink:0;
+  }
   .user-name { font-size:13px; font-weight:500; color:var(--white); }
-  .btn-logout { padding:6px 14px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); border-radius:8px; color:#fff; font-size:12px; font-weight:600; font-family:inherit; cursor:pointer; text-decoration:none; }
-  .btn-logout:hover { background:rgba(255,0,0,0.3); }
+
+  .user-caret {
+    width:14px; height:14px; color:rgba(255,255,255,0.7);
+    transition:transform .2s; flex-shrink:0;
+    fill:none; stroke:currentColor; stroke-width:2.5;
+  }
+  .user-menu.open .user-caret { transform:rotate(180deg); }
+
+  /* --- Dropdown Panel --- */
+  .user-dropdown {
+    position:absolute; top:calc(100% + 10px); right:0;
+    background:#fff; border-radius:12px; min-width:200px;
+    box-shadow:0 8px 32px rgba(10,20,60,0.18);
+    border:1px solid rgba(0,0,0,0.07);
+    overflow:hidden; display:none; z-index:300;
+    animation:dropIn .18s ease;
+  }
+  @keyframes dropIn {
+    from { opacity:0; transform:translateY(-6px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  .user-menu.open .user-dropdown { display:block; }
+
+  .dropdown-info {
+    padding:14px 16px 12px;
+    border-bottom:1px solid #f0f2f6;
+  }
+  .dropdown-info .d-name {
+    font-size:13px; font-weight:700; color:#1a2e5a;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .dropdown-info .d-role {
+    font-size:11px; color:#9eadc8; margin-top:2px;
+  }
+
+  .dropdown-item {
+    display:flex; align-items:center; gap:10px;
+    padding:11px 16px; font-size:13px; font-weight:500;
+    color:#1a2e5a; text-decoration:none; cursor:pointer;
+    transition:background .15s; border:none;
+    background:none; width:100%; font-family:inherit;
+  }
+  .dropdown-item:hover { background:#f4f6fb; }
+  .dropdown-item svg {
+    width:16px; height:16px; flex-shrink:0;
+    fill:none; stroke:currentColor; stroke-width:2;
+    color:#9eadc8;
+  }
+
+  .dropdown-divider { height:1px; background:#f0f2f6; margin:4px 0; }
+
+  .dropdown-item.logout {
+    color:#9b2222;
+    border-top:1px solid #f0f2f6;
+  }
+  .dropdown-item.logout:hover { background:#fce8e8; }
+  .dropdown-item.logout svg { color:#e05252; }
   .hero { background:linear-gradient(135deg,var(--navy-dark) 0%,var(--navy-mid) 60%,var(--blue) 100%); padding:2.5rem 2rem 3.5rem; text-align:center; position:relative; overflow:hidden; }
   .hero::before { content:''; position:absolute; top:-60px; right:-80px; width:300px; height:300px; border-radius:50%; background:rgba(255,255,255,0.04); }
   .hero::after { content:''; position:absolute; bottom:-40px; left:-60px; width:220px; height:220px; border-radius:50%; background:rgba(255,255,255,0.04); }
@@ -136,24 +207,71 @@ $user = currentUser();
 </head>
 <body>
 
-<!-- HEADER -->
 <header>
-  <div class="logo-emblem">
-  <img src="logo.png" alt="SIPATEN" style="width:42px;height:42px;object-fit:contain;border-radius:50%;">
-</div>
+  <!-- Logo -->
+  <div style="display:flex;align-items:center;gap:12px">
+    <div class="logo-emblem">
+      <img src="logo.png" alt="SIPATEN"
+           style="width:42px;height:42px;object-fit:contain;border-radius:50%;">
+    </div>
     <div class="logo-text">
       <div class="brand">SIPATEN</div>
       <div class="tagline">Sistem Penyimpanan Arsip Kepegawaian Terintegrasi dan Nyaman</div>
     </div>
   </div>
+ 
+  <!-- User Dropdown (sudut kanan) -->
   <div class="header-right">
-    <a href="profile.php" class="user-badge">
-  <div class="user-avatar"><?= htmlspecialchars($user['inisial'] ?? 'A') ?></div>
-  <span class="user-name"><?= htmlspecialchars($user['nama'] ?? 'Admin') ?></span>
-</a>
-    </div>
-    <a href="logout.php" class="btn-logout">Keluar</a>
-  </div>
+    <div class="user-menu" id="user-menu">
+ 
+      <!-- Tombol trigger -->
+      <div class="user-badge" onclick="toggleUserMenu(event)">
+        <div class="user-avatar">
+          <?= htmlspecialchars($user['inisial'] ?? 'A') ?>
+        </div>
+        <span class="user-name">
+          <?= htmlspecialchars($user['nama'] ?? 'Admin') ?>
+        </span>
+        <!-- Caret / panah bawah -->
+        <svg class="user-caret" viewBox="0 0 24 24">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </div>
+ 
+      <!-- Panel dropdown -->
+      <div class="user-dropdown">
+        <!-- Info nama & role -->
+        <div class="dropdown-info">
+          <div class="d-name"><?= htmlspecialchars($user['nama'] ?? 'Admin') ?></div>
+          <div class="d-role">
+            <?= isAdmin() ? 'Administrator' : 'Pengguna' ?>
+          </div>
+        </div>
+ 
+        <!-- Menu: Profil Saya -->
+        <a href="profile.php" class="dropdown-item">
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+          </svg>
+          Profil Saya
+        </a>
+ 
+        <div class="dropdown-divider"></div>
+ 
+        <!-- Menu: Keluar -->
+        <a href="logout.php" class="dropdown-item logout">
+          <svg viewBox="0 0 24 24">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Keluar
+        </a>
+      </div>
+ 
+    </div><!-- /.user-menu -->
+  </div><!-- /.header-right -->
 </header>
 
 <!-- ────────── HOME PAGE ────────── -->
@@ -506,7 +624,26 @@ $user = currentUser();
 // ═══════════════════════════════════════════════════════
 //  SIPATEN Frontend JS — Terhubung ke API Backend
 // ═══════════════════════════════════════════════════════
+// ── User Dropdown Toggle ──────────────────────────────
+function toggleUserMenu(e) {
+  e.stopPropagation();
+  document.getElementById('user-menu').classList.toggle('open');
+}
 
+// Tutup dropdown kalau klik di luar
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('user-menu');
+  if (menu && !menu.contains(e.target)) {
+    menu.classList.remove('open');
+  }
+});
+
+// Tutup dropdown kalau tekan Escape
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.getElementById('user-menu')?.classList.remove('open');
+  }
+});
 const API = 'api/index.php';
 const pages = ['home','ringkasan','data-pegawai','kenaikan-gaji','tunjangan','slks','arsip'];
 
