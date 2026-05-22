@@ -128,6 +128,39 @@ if ($module === 'pegawai') {
         echo json_encode(['success'=>true,'message'=>'Pegawai berhasil dihapus']);
         exit;
     }
+    if ($action === 'upload_foto') {
+        if (!canEdit()) { echo json_encode(['success'=>false,'message'=>'Akses ditolak']); exit; }
+        $file = $_FILES['foto'] ?? null;
+        $pid  = $_POST['pegawai_id'] ?? '';
+        if (!$file || $file['error'] !== 0) { echo json_encode(['success'=>false,'message'=>'File tidak valid']); exit; }
+        if (!$pid) { echo json_encode(['success'=>false,'message'=>'ID pegawai tidak valid']); exit; }
+
+        // Validasi ukuran & tipe
+        if ($file['size'] > 2 * 1024 * 1024) { echo json_encode(['success'=>false,'message'=>'Ukuran foto maksimal 2MB']); exit; }
+        $finfo    = new finfo(FILEINFO_MIME_TYPE);
+        $mime     = $finfo->file($file['tmp_name']);
+        $extMap   = ['image/jpeg'=>'jpg','image/png'=>'png','image/webp'=>'webp'];
+        if (!isset($extMap[$mime])) { echo json_encode(['success'=>false,'message'=>'Format harus JPG, PNG, atau WEBP']); exit; }
+
+        // Hapus foto lama
+        $cek = $db->prepare("SELECT foto FROM pegawai WHERE id=?");
+        $cek->execute([$pid]);
+        $lama = $cek->fetchColumn();
+        if ($lama && file_exists('../'.$lama)) unlink('../'.$lama);
+
+        // Simpan foto baru
+        $dir = '../uploads/foto/';
+        if (!is_dir($dir)) mkdir($dir, 0755, true);
+        $fname = 'pegawai_'.$pid.'_'.time().'.'.$extMap[$mime];
+        if (!move_uploaded_file($file['tmp_name'], $dir.$fname)) {
+            echo json_encode(['success'=>false,'message'=>'Gagal menyimpan foto']); exit;
+        }
+        $path = 'uploads/foto/'.$fname;
+        $db->prepare("UPDATE pegawai SET foto=? WHERE id=?")->execute([$path, $pid]);
+        logActivity('Upload', 'Foto', "Upload foto pegawai ID: $pid");
+        echo json_encode(['success'=>true,'message'=>'Foto berhasil diupload','foto'=>$path]);
+        exit;
+    }
 }
 
 // ══════════════════════════════════════════════════════
