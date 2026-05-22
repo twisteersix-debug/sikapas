@@ -176,9 +176,9 @@ $user = currentUser();
   input[type="text"],input[type="date"],input[type="number"],select,textarea { padding:10px 14px; border:1px solid var(--gray-200); border-radius:8px; font-size:13px; font-family:inherit; color:var(--text); outline:none; transition:border-color .2s; background:#fff; }
   input:focus,select:focus,textarea:focus { border-color:var(--blue-light); }
   .form-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:1.25rem; }
-  .modal-overlay { position:fixed; inset:0; background:rgba(10,20,50,0.55); display:none; align-items:flex-start; justify-content:center; z-index:200; overflow-y:auto; padding:2rem 1rem; }
-  .modal-overlay.open { display:block; overflow-y:auto; padding:2rem 1rem; }
-  .modal { background:var(--white); border-radius:16px; padding:2rem; width:100%; max-width:520px; box-shadow:0 20px 60px rgba(0,0,0,0.25); margin:0 auto; }
+  .modal-overlay { position:fixed; inset:0; background:rgba(10,20,50,0.55); display:none; justify-content:center; z-index:200; overflow-y:auto; padding:2rem 1rem; }
+  .modal-overlay.open { display:grid; place-items:start center; }
+   .modal { position:relative; z-index:201; background:var(--white); border-radius:16px; padding:2rem; width:100%; max-width:580px; box-shadow:0 20px 60px rgba(0,0,0,0.25); margin:2rem auto; }
   .modal-title { font-size:18px; font-weight:700; color:var(--navy); margin-bottom:1.25rem; }
   .file-list { display:flex; flex-direction:column; gap:10px; }
   .file-item { background:var(--white); border:1px solid var(--gray-200); border-radius:var(--radius); padding:1rem 1.25rem; display:flex; align-items:center; gap:14px; box-shadow:var(--shadow); }
