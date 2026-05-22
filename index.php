@@ -706,8 +706,7 @@ async function loadPegawai(q='') {
   if (!res?.success) return;
   document.getElementById('pegawai-tbody').innerHTML = res.data.map(p => `
     <tr>
-      <td><a href="profil_pegawai.php?id=${p.id}" style="color:var(--blue);font-weight:600;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${p.nip}</a></td><td><a href="profil_pegawai.php?id=${p.id}" style="color:var(--navy);font-weight:600;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${p.nama}</a></td><td>${p.jabatan||'-'}</td><td>${p.jabatan||'-'}</td>
-      <td>${p.golongan||'-'}</td><td>${p.satker||'-'}</td>
+      <td><a href="profil_pegawai.php?id=${p.id}" style="color:var(--blue);font-weight:600;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${p.nip}</a></td><td><a href="profil_pegawai.php?id=${p.id}" style="color:var(--navy);font-weight:600;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${p.nama}</a></td><td>${p.jabatan||'-'}</td>
       <td>${badge(p.status)}</td>
       <td style="white-space:nowrap">
         <button class="btn btn-sm btn-outline" onclick="editPegawai(${p.id})">Edit</button>
