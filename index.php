@@ -782,23 +782,34 @@ async function editPegawai(id) {
 }
 
 async function savePegawai() {
+  const nip  = document.getElementById('peg-nip').value.trim();
+  const nama = document.getElementById('peg-nama').value.trim();
+
+  if (!nip)  { toast('NIP wajib diisi', 'error'); return; }
+  if (!nama) { toast('Nama Lengkap wajib diisi', 'error'); return; }
+
   const body = {
-    id: document.getElementById('pegawai-id').value,
-    nip: document.getElementById('peg-nip').value,
-    nama: document.getElementById('peg-nama').value,
-    jabatan: document.getElementById('peg-jabatan').value,
-    golongan: document.getElementById('peg-golongan').value,
-    satker_id: document.getElementById('peg-satker').value,
-    tmt_pns: document.getElementById('peg-tmt').value,
-    status: document.getElementById('peg-status').value,
+    id:            document.getElementById('pegawai-id').value,
+    nip:           nip,
+    nama:          nama,
+    jabatan:       document.getElementById('peg-jabatan').value.trim(),
+    golongan:      document.getElementById('peg-golongan').value,
+    satker_id:     document.getElementById('peg-satker').value,
+    tmt_pns:       document.getElementById('peg-tmt').value,
+    status:        document.getElementById('peg-status').value,
+    no_telepon:    document.getElementById('peg-telp').value.trim(),
+    email:         document.getElementById('peg-email').value.trim(),
+    tanggal_lahir: document.getElementById('peg-tgl-lahir').value,
+    alamat:        document.getElementById('peg-alamat').value.trim(),
   };
-  const res = await apiPost('pegawai','save',body);
+
+  const res = await apiPost('pegawai', 'save', body);
   if (res?.success) {
     closeModal('modal-pegawai');
     toast(res.message);
     loadPegawai(document.getElementById('pegawai-search').value);
   } else {
-    toast(res?.message || 'Gagal menyimpan','error');
+    toast(res?.message || 'Gagal menyimpan', 'error');
   }
 }
 
