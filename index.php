@@ -491,7 +491,7 @@ function showPage(id) {
   if (id === 'kenaikan-gaji')  { loadKGB(); loadSatkerOptions(); }
   if (id === 'tunjangan')      loadTunjangan();
   if (id === 'slks')           loadSLKS();
-  if (id === 'arsip')          loadArsip();
+  if (id === 'arsip') window.location.href = 'arsip.php';
 }
 function goHome() { showPage('home'); }
 
