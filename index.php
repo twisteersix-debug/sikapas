@@ -176,9 +176,9 @@ $user = currentUser();
   input[type="text"],input[type="date"],input[type="number"],select,textarea { padding:10px 14px; border:1px solid var(--gray-200); border-radius:8px; font-size:13px; font-family:inherit; color:var(--text); outline:none; transition:border-color .2s; background:#fff; }
   input:focus,select:focus,textarea:focus { border-color:var(--blue-light); }
   .form-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:1.25rem; }
-  .modal-overlay { position:fixed; inset:0; background:rgba(10,20,50,0.55); display:none; justify-content:center; z-index:200; overflow-y:auto; padding:2rem 1rem; }
-  .modal-overlay.open { display:grid; place-items:start center; }
-   .modal { position:relative; z-index:201; background:var(--white); border-radius:16px; padding:2rem; width:100%; max-width:580px; box-shadow:0 20px 60px rgba(0,0,0,0.25); margin:2rem auto; }
+  .modal-overlay { position:fixed; inset:0; background:rgba(10,20,50,0.55); display:none; z-index:200; overflow-y:auto; }
+  .modal-overlay.open { display:flex; align-items:flex-start; justify-content:center; padding:2rem 1rem; }
+  .modal { position:relative; z-index:201; background:var(--white); border-radius:16px; padding:2rem; width:100%; max-width:580px; box-shadow:0 20px 60px rgba(0,0,0,0.25); margin:2rem auto; }
   .modal-title { font-size:18px; font-weight:700; color:var(--navy); margin-bottom:1.25rem; }
   .file-list { display:flex; flex-direction:column; gap:10px; }
   .file-item { background:var(--white); border:1px solid var(--gray-200); border-radius:var(--radius); padding:1rem 1.25rem; display:flex; align-items:center; gap:14px; box-shadow:var(--shadow); }
@@ -507,9 +507,12 @@ $user = currentUser();
 
 <!-- ──── MODAL TAMBAH/EDIT PEGAWAI ──── -->
 <!-- ──── MODAL TAMBAH/EDIT PEGAWAI ──── -->
-<div class="modal-overlay" id="modal-pegawai" onclick="closeModalOutside(event,'modal-pegawai')">
-  <div class="modal" style="max-width:620px;max-height:90vh;overflow-y:auto">
-    <p class="modal-title" id="modal-pegawai-title">Tambah Data Pegawai Baru</p>
+<div class="modal-overlay" id="modal-pegawai">
+  <div class="modal" style="max-width:620px;overflow-y:auto;margin:auto">
+   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
+  <p class="modal-title" id="modal-pegawai-title" style="margin:0">Tambah Data Pegawai Baru</p>
+  <button onclick="closeModal('modal-pegawai')" style="background:none;border:none;cursor:pointer;font-size:20px;color:#9eadc8;line-height:1">✕</button>
+</div>
     <input type="hidden" id="pegawai-id">
     <div class="form-grid">
       <div class="form-group"><label>NIP</label><input type="text" id="peg-nip" placeholder="18 digit NIP"></div>
