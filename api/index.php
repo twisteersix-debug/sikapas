@@ -231,12 +231,39 @@ if ($module === 'dokumen') {
 // ══════════════════════════════════════════════════════
 if ($module === 'pengingat') {
     if ($action === 'list') {
-        $q = '%'.($_GET['q'] ?? '').'%';
-        $stmt = $db->prepare("SELECT pg.*, p.nama, p.nip, p.jabatan, DATEDIFF(pg.tgl_pensiun, NOW()) AS sisa_hari FROM pengingat pg JOIN pegawai p ON p.id=pg.pegawai_id WHERE p.nama LIKE ? OR p.nip LIKE ? ORDER BY pg.tgl_pensiun ASC");
-        $stmt->execute([$q,$q]);
-        echo json_encode(['success'=>true,'data'=>$stmt->fetchAll()]);
-        exit;
-    }
+    $q = '%'.($_GET['q'] ?? '').'%';
+    
+    // Auto-insert pegawai baru yang belum ada pengingat
+    $db->query("
+        INSERT IGNORE INTO pengingat (pegawai_id, tgl_pensiun, catatan)
+        SELECT id, DATE_ADD(tanggal_lahir, INTERVAL 58 YEAR), 'Auto dari data pegawai'
+        FROM pegawai 
+        WHERE tanggal_lahir IS NOT NULL AND status='Aktif'
+        AND id NOT IN (SELECT pegawai_id FROM pengingat)
+    ");
+    
+    // Auto-update jika tanggal lahir berubah
+    $db->query("
+        UPDATE pengingat pg
+        JOIN pegawai p ON p.id = pg.pegawai_id
+        SET pg.tgl_pensiun = DATE_ADD(p.tanggal_lahir, INTERVAL 58 YEAR)
+        WHERE p.tanggal_lahir IS NOT NULL
+    ");
+
+    $stmt = $db->prepare("
+        SELECT pg.*, p.nama, p.nip, p.jabatan, p.golongan, s.nama AS satker,
+               DATEDIFF(pg.tgl_pensiun, NOW()) AS sisa_hari,
+               TIMESTAMPDIFF(YEAR, p.tanggal_lahir, NOW()) AS umur_sekarang
+        FROM pengingat pg 
+        JOIN pegawai p ON p.id=pg.pegawai_id
+        LEFT JOIN satker s ON s.id=p.satker_id
+        WHERE (p.nama LIKE ? OR p.nip LIKE ?)
+        ORDER BY pg.tgl_pensiun ASC
+    ");
+    $stmt->execute([$q, $q]);
+    echo json_encode(['success'=>true,'data'=>$stmt->fetchAll()]);
+    exit;
+}
     if ($action === 'save') {
         if (!canEdit()) { echo json_encode(['success'=>false,'message'=>'Akses ditolak']); exit; }
         $pid     = $body['pegawai_id'] ?? '';
