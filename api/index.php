@@ -62,25 +62,28 @@ if ($module === 'satker') {
 // ══════════════════════════════════════════════════════
 if ($module === 'pegawai') {
     if ($action === 'list') {
-        $q      = '%'.($_GET['q'] ?? '').'%';
-        $satker = $_GET['satker_id'] ?? '';
-        $status = $_GET['status'] ?? '';
-        $sql    = "SELECT p.*, s.nama AS satker FROM pegawai p LEFT JOIN satker s ON s.id=p.satker_id WHERE (p.nama LIKE ? OR p.nip LIKE ? OR p.jabatan LIKE ?)";
-        $params = [$q,$q,$q];
-        if ($satker) { $sql .= " AND p.satker_id=?"; $params[] = $satker; }
-        if ($status) { $sql .= " AND p.status=?";    $params[] = $status; }
-
-        // Pegawai hanya bisa lihat data sendiri
-        if (isPegawai()) {
-            $sql .= " AND p.id=(SELECT pegawai_id FROM users WHERE id=?)";
-            $params[] = $uid;
-        }
-        $sql .= " ORDER BY p.nama LIMIT 100";
-        $stmt = $db->prepare($sql);
-        $stmt->execute($params);
-        echo json_encode(['success'=>true,'data'=>$stmt->fetchAll()]);
-        exit;
-    }
+    $q = '%'.($_GET['q'] ?? '').'%';
+    $db->query("
+        INSERT IGNORE INTO pengingat (pegawai_id, tgl_pensiun, catatan)
+        SELECT id, DATE_ADD(tanggal_lahir, INTERVAL 58 YEAR), 'Auto dari data pegawai'
+        FROM pegawai 
+        WHERE tanggal_lahir IS NOT NULL AND status='Aktif'
+        AND id NOT IN (SELECT pegawai_id FROM pengingat)
+    ");
+    $stmt = $db->prepare("
+        SELECT pg.*, p.nama, p.nip, p.jabatan, p.golongan, s.nama AS satker,
+               DATEDIFF(pg.tgl_pensiun, NOW()) AS sisa_hari,
+               TIMESTAMPDIFF(YEAR, p.tanggal_lahir, NOW()) AS umur_sekarang
+        FROM pengingat pg 
+        JOIN pegawai p ON p.id=pg.pegawai_id
+        LEFT JOIN satker s ON s.id=p.satker_id
+        WHERE (p.nama LIKE ? OR p.nip LIKE ?)
+        ORDER BY pg.tgl_pensiun ASC
+    ");
+    $stmt->execute([$q,$q]);
+    echo json_encode(['success'=>true,'data'=>$stmt->fetchAll()]);
+    exit;
+}
     if ($action === 'get') {
         $stmt = $db->prepare("SELECT p.*, s.nama AS satker_nama FROM pegawai p LEFT JOIN satker s ON s.id=p.satker_id WHERE p.id=?");
         $stmt->execute([$_GET['id']]);
