@@ -12,14 +12,18 @@ $db = getDB();
 $error = '';
 $success = '';
 
+// Ambil daftar satker untuk dropdown
+$satkerList = $db->query("SELECT id, nama FROM satker ORDER BY nama")->fetchAll();
+
 // Handle actions
 $act = $_POST['act'] ?? '';
 
 if ($act === 'tambah') {
-    $nama     = trim($_POST['nama'] ?? '');
-    $username = trim($_POST['username'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $role     = $_POST['role'] ?? 'operator';
+    $nama      = trim($_POST['nama'] ?? '');
+    $username  = trim($_POST['username'] ?? '');
+    $password  = $_POST['password'] ?? '';
+    $role      = $_POST['role'] ?? 'operator';
+    $satker_id = $_POST['satker_id'] ?: null;
 
     if (!$nama || !$username || !$password) {
         $error = 'Semua field wajib diisi.';
@@ -30,19 +34,20 @@ if ($act === 'tambah') {
             $error = 'Username sudah digunakan.';
         } else {
             $hash = password_hash($password, PASSWORD_BCRYPT);
-            $stmt = $db->prepare("INSERT INTO users (nama, username, password, role) VALUES (?,?,?,?)");
-            $stmt->execute([$nama, $username, $hash, $role]);
+            $stmt = $db->prepare("INSERT INTO users (nama, username, password, role, satker_id) VALUES (?,?,?,?,?)");
+            $stmt->execute([$nama, $username, $hash, $role, $satker_id]);
             $success = "User '$username' berhasil ditambahkan.";
         }
     }
 }
 
 if ($act === 'edit') {
-    $id       = $_POST['id'] ?? '';
-    $nama     = trim($_POST['nama'] ?? '');
-    $username = trim($_POST['username'] ?? '');
-    $role     = $_POST['role'] ?? 'operator';
-    $password = $_POST['password'] ?? '';
+    $id        = $_POST['id'] ?? '';
+    $nama      = trim($_POST['nama'] ?? '');
+    $username  = trim($_POST['username'] ?? '');
+    $role      = $_POST['role'] ?? 'operator';
+    $password  = $_POST['password'] ?? '';
+    $satker_id = $_POST['satker_id'] ?: null;
 
     if (!$nama || !$username) {
         $error = 'Nama dan username wajib diisi.';
@@ -54,11 +59,11 @@ if ($act === 'edit') {
         } else {
             if ($password) {
                 $hash = password_hash($password, PASSWORD_BCRYPT);
-                $stmt = $db->prepare("UPDATE users SET nama=?,username=?,password=?,role=? WHERE id=?");
-                $stmt->execute([$nama, $username, $hash, $role, $id]);
+                $stmt = $db->prepare("UPDATE users SET nama=?,username=?,password=?,role=?,satker_id=? WHERE id=?");
+                $stmt->execute([$nama, $username, $hash, $role, $satker_id, $id]);
             } else {
-                $stmt = $db->prepare("UPDATE users SET nama=?,username=?,role=? WHERE id=?");
-                $stmt->execute([$nama, $username, $role, $id]);
+                $stmt = $db->prepare("UPDATE users SET nama=?,username=?,role=?,satker_id=? WHERE id=?");
+                $stmt->execute([$nama, $username, $role, $satker_id, $id]);
             }
             $success = "User '$username' berhasil diupdate.";
         }
@@ -74,13 +79,20 @@ if ($act === 'hapus') {
         $success = 'User berhasil dihapus.';
     }
 }
+
 if ($act === 'reset_pass') {
     $id = $_POST['id'] ?? '';
     $hash = password_hash('sipaten123', PASSWORD_BCRYPT);
     $db->prepare("UPDATE users SET password=? WHERE id=?")->execute([$hash, $id]);
     $success = 'Password berhasil direset ke default: sipaten123';
 }
-$users = $db->query("SELECT id, nama, username, role, created_at FROM users ORDER BY created_at DESC")->fetchAll();
+
+$users = $db->query("
+    SELECT u.id, u.nama, u.username, u.role, u.satker_id, u.created_at, s.nama AS satker_nama
+    FROM users u
+    LEFT JOIN satker s ON s.id = u.satker_id
+    ORDER BY u.created_at DESC
+")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -102,7 +114,7 @@ $users = $db->query("SELECT id, nama, username, role, created_at FROM users ORDE
   .header-right{display:flex;align-items:center;gap:10px}
   .btn-back{padding:6px 14px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;color:#fff;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;text-decoration:none}
   .btn-back:hover{background:rgba(255,255,255,.25)}
-  main{flex:1;padding:2rem;max-width:960px;margin:0 auto;width:100%}
+  main{flex:1;padding:2rem;max-width:1060px;margin:0 auto;width:100%}
   .page-title{font-size:22px;font-weight:700;color:var(--navy);margin-bottom:1.5rem;display:flex;align-items:center;gap:10px}
   .alert{padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:1.25rem;font-weight:500}
   .alert-success{background:#e2f5ea;color:#1a7a38;border:1px solid #b2dfc0}
@@ -110,6 +122,7 @@ $users = $db->query("SELECT id, nama, username, role, created_at FROM users ORDE
   .card{background:var(--white);border-radius:var(--radius);border:1px solid var(--gray-200);box-shadow:var(--shadow);padding:1.5rem;margin-bottom:1.5rem}
   .card-title{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:1.25rem;padding-bottom:.75rem;border-bottom:1px solid var(--gray-200)}
   .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+  .form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
   .form-group{display:flex;flex-direction:column;gap:6px}
   label{font-size:13px;font-weight:600;color:var(--gray-600)}
   input[type=text],input[type=password],select{padding:10px 14px;border:1px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;color:var(--navy);outline:none;transition:border-color .2s;background:#fff}
@@ -135,13 +148,16 @@ $users = $db->query("SELECT id, nama, username, role, created_at FROM users ORDE
   .badge-viewer{background:#fef3dd;color:#8a5500}
   .table-wrapper{background:var(--white);border-radius:var(--radius);border:1px solid var(--gray-200);box-shadow:var(--shadow);overflow:hidden}
   .table-toolbar{padding:1rem 1.25rem;border-bottom:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between}
-  .modal-overlay{position:fixed;inset:0;background:rgba(10,20,50,.55);display:none;align-items:center;justify-content:center;z-index:200}
+  .modal-overlay{position:fixed;inset:0;background:rgba(10,20,50,.55);display:none;align-items:center;justify-content:center;z-index:200;padding:1rem;overflow-y:auto}
   .modal-overlay.open{display:flex}
-  .modal{background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+  .modal{background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:520px;box-shadow:0 20px 60px rgba(0,0,0,.25);margin:auto}
   .modal-title{font-size:17px;font-weight:700;color:var(--navy);margin-bottom:1.25rem}
+  .satker-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;background:#e8f2fb;color:#1a2e5a}
+  .satker-none{font-size:12px;color:var(--gray-400);font-style:italic}
+  .info-box{background:#fef3dd;border:1px solid #f0d080;border-radius:8px;padding:12px 16px;font-size:13px;color:#7b4f00;margin-bottom:1.25rem}
   footer{background:#fff;border-top:1px solid var(--gray-200);padding:14px 2rem;display:flex;justify-content:space-between}
   footer span{font-size:12px;color:var(--gray-400)}
-  @media(max-width:640px){.form-grid{grid-template-columns:1fr}main{padding:1rem}}
+  @media(max-width:700px){.form-grid,.form-grid-3{grid-template-columns:1fr}main{padding:1rem}.table-wrapper{overflow-x:auto}}
 </style>
 </head>
 <body>
@@ -174,6 +190,10 @@ $users = $db->query("SELECT id, nama, username, role, created_at FROM users ORDE
     <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
   <?php endif; ?>
 
+  <div class="info-box">
+    ℹ️ <strong>Aturan Akses Satker:</strong> User dengan role <strong>Operator</strong> atau <strong>Viewer</strong> hanya dapat melihat dan mengelola data pegawai di satker yang ditentukan. Admin dapat mengakses semua satker.
+  </div>
+
   <!-- Form Tambah User -->
   <div class="card">
     <div class="card-title">➕ Tambah User Baru</div>
@@ -194,11 +214,21 @@ $users = $db->query("SELECT id, nama, username, role, created_at FROM users ORDE
         </div>
         <div class="form-group">
           <label>Role</label>
-          <select name="role">
+          <select name="role" id="add-role" onchange="toggleSatkerAdd(this.value)">
             <option value="operator">Operator</option>
             <option value="viewer">Viewer</option>
             <option value="admin">Admin</option>
           </select>
+        </div>
+        <div class="form-group" id="add-satker-group">
+          <label>Satuan Kerja <span style="color:#9b2222">*</span></label>
+          <select name="satker_id">
+            <option value="">— Semua Satker (Admin) —</option>
+            <?php foreach ($satkerList as $s): ?>
+              <option value="<?= $s['id'] ?>"><?= htmlspecialchars($s['nama']) ?></option>
+            <?php endforeach; ?>
+          </select>
+          <small style="color:var(--gray-400);font-size:11px">Wajib dipilih untuk Operator/Viewer</small>
         </div>
       </div>
       <div class="form-actions">
@@ -219,6 +249,7 @@ $users = $db->query("SELECT id, nama, username, role, created_at FROM users ORDE
           <th>Nama</th>
           <th>Username</th>
           <th>Role</th>
+          <th>Satker</th>
           <th>Dibuat</th>
           <th>Aksi</th>
         </tr>
@@ -230,20 +261,29 @@ $users = $db->query("SELECT id, nama, username, role, created_at FROM users ORDE
           <td><?= htmlspecialchars($u['nama']) ?></td>
           <td><code><?= htmlspecialchars($u['username']) ?></code></td>
           <td><span class="badge badge-<?= $u['role'] ?>"><?= ucfirst($u['role']) ?></span></td>
+          <td>
+            <?php if ($u['role'] === 'admin'): ?>
+              <span class="satker-pill">🔓 Semua Satker</span>
+            <?php elseif ($u['satker_nama']): ?>
+              <span class="satker-pill">🏢 <?= htmlspecialchars($u['satker_nama']) ?></span>
+            <?php else: ?>
+              <span class="satker-none">Belum ditentukan</span>
+            <?php endif; ?>
+          </td>
           <td><?= date('d M Y', strtotime($u['created_at'])) ?></td>
-          <td style="white-space:nowrap;display:flex;gap:6px">
+          <td style="white-space:nowrap;display:flex;gap:6px;flex-wrap:wrap">
             <button class="btn btn-sm btn-outline" onclick="openEdit(<?= htmlspecialchars(json_encode($u)) ?>)">Edit</button>
             <?php if ($u['id'] != $_SESSION['user_id']): ?>
             <form method="POST" onsubmit="return confirm('Reset password <?= htmlspecialchars($u['username']) ?> ke default?')" style="display:inline">
-  <input type="hidden" name="act" value="reset_pass">
-  <input type="hidden" name="id" value="<?= $u['id'] ?>">
-  <button type="submit" class="btn btn-sm" style="background:#fef3dd;color:#8a5500;border:1px solid #f0d080">Reset Pass</button>
-</form>
-<form method="POST" onsubmit="return confirm('Hapus user <?= htmlspecialchars($u['username']) ?>?')" style="display:inline">
-  <input type="hidden" name="act" value="hapus">
-  <input type="hidden" name="id" value="<?= $u['id'] ?>">
-  <button type="submit" class="btn btn-danger">Hapus</button>
-</form>
+              <input type="hidden" name="act" value="reset_pass">
+              <input type="hidden" name="id" value="<?= $u['id'] ?>">
+              <button type="submit" class="btn btn-sm" style="background:#fef3dd;color:#8a5500;border:1px solid #f0d080">Reset Pass</button>
+            </form>
+            <form method="POST" onsubmit="return confirm('Hapus user <?= htmlspecialchars($u['username']) ?>?')" style="display:inline">
+              <input type="hidden" name="act" value="hapus">
+              <input type="hidden" name="id" value="<?= $u['id'] ?>">
+              <button type="submit" class="btn btn-danger">Hapus</button>
+            </form>
             <?php else: ?>
             <span style="font-size:12px;color:var(--gray-400);padding:5px">Anda</span>
             <?php endif; ?>
@@ -258,7 +298,10 @@ $users = $db->query("SELECT id, nama, username, role, created_at FROM users ORDE
 <!-- Modal Edit User -->
 <div class="modal-overlay" id="modal-edit" onclick="if(event.target===this)closeEdit()">
   <div class="modal">
-    <div class="modal-title">✏️ Edit User</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
+      <div class="modal-title" style="margin:0">✏️ Edit User</div>
+      <button onclick="closeEdit()" style="background:none;border:none;cursor:pointer;font-size:20px;color:#9eadc8">✕</button>
+    </div>
     <form method="POST">
       <input type="hidden" name="act" value="edit">
       <input type="hidden" name="id" id="edit-id">
@@ -277,11 +320,21 @@ $users = $db->query("SELECT id, nama, username, role, created_at FROM users ORDE
         </div>
         <div class="form-group">
           <label>Role</label>
-          <select name="role" id="edit-role">
+          <select name="role" id="edit-role" onchange="toggleSatkerEdit(this.value)">
             <option value="operator">Operator</option>
             <option value="viewer">Viewer</option>
             <option value="admin">Admin</option>
           </select>
+        </div>
+        <div class="form-group" id="edit-satker-group" style="grid-column:1/-1">
+          <label>Satuan Kerja <span style="color:#9b2222">*</span></label>
+          <select name="satker_id" id="edit-satker">
+            <option value="">— Semua Satker (Admin) —</option>
+            <?php foreach ($satkerList as $s): ?>
+              <option value="<?= $s['id'] ?>"><?= htmlspecialchars($s['nama']) ?></option>
+            <?php endforeach; ?>
+          </select>
+          <small style="color:var(--gray-400);font-size:11px">Wajib dipilih untuk Operator/Viewer</small>
         </div>
       </div>
       <div class="form-actions">
@@ -298,13 +351,26 @@ $users = $db->query("SELECT id, nama, username, role, created_at FROM users ORDE
 </footer>
 
 <script>
+function toggleSatkerAdd(role) {
+  const grp = document.getElementById('add-satker-group');
+  grp.style.opacity = role === 'admin' ? '0.4' : '1';
+}
+
+function toggleSatkerEdit(role) {
+  const grp = document.getElementById('edit-satker-group');
+  grp.style.opacity = role === 'admin' ? '0.4' : '1';
+}
+
 function openEdit(u) {
   document.getElementById('edit-id').value       = u.id;
   document.getElementById('edit-nama').value     = u.nama;
   document.getElementById('edit-username').value = u.username;
   document.getElementById('edit-role').value     = u.role;
+  document.getElementById('edit-satker').value   = u.satker_id || '';
+  toggleSatkerEdit(u.role);
   document.getElementById('modal-edit').classList.add('open');
 }
+
 function closeEdit() {
   document.getElementById('modal-edit').classList.remove('open');
 }
