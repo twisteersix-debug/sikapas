@@ -1,11 +1,22 @@
 <?php
 // ============================================================
-//  SIPATEN — Halaman Utama (Frontend + Backend Integration)
+//  SIPATEN — Halaman Utama
 //  File: index.php
+//  Update: Modal pegawai + KTP, NPWP, TASPEN
 // ============================================================
 require_once 'includes/config.php';
 requireLogin();
 $user = currentUser();
+
+// Ambil info satker user (untuk ditampilkan di UI non-admin)
+$db = getDB();
+$userSatkerNama = '';
+if (!isAdmin() && !empty($_SESSION['user_id'])) {
+    $stkStmt = $db->prepare("SELECT s.nama FROM users u JOIN satker s ON s.id=u.satker_id WHERE u.id=?");
+    $stkStmt->execute([$_SESSION['user_id']]);
+    $stkRow = $stkStmt->fetch();
+    $userSatkerNama = $stkRow['nama'] ?? '';
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -28,86 +39,30 @@ $user = currentUser();
   header { background:linear-gradient(135deg,var(--navy-dark) 0%,var(--navy-mid) 60%,var(--blue) 100%); padding:0 2rem; height:64px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; box-shadow:0 2px 16px rgba(0,0,0,0.25); }
   .logo { display:flex; align-items:center; gap:12px; }
   .logo-emblem { width:42px; height:42px; background:var(--white); border-radius:8px; display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; }
-  .logo-emblem svg { width:32px; height:32px; }
   .logo-text { line-height:1.2; }
   .logo-text .brand { font-size:22px; font-weight:700; color:var(--white); letter-spacing:1px; }
   .logo-text .tagline { font-size:10px; color:rgba(255,255,255,0.65); font-weight:400; }
   .header-right { display:flex; align-items:center; gap:10px; }
-  /* --- User Dropdown --- */
+  .satker-badge { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); border-radius:20px; padding:4px 12px; font-size:11px; color:rgba(255,255,255,0.9); font-weight:600; }
   .user-menu { position:relative; }
-
-  .user-badge {
-    display:flex; align-items:center; gap:10px;
-    background:rgba(255,255,255,0.12);
-    border:1px solid rgba(255,255,255,0.2);
-    border-radius:32px; padding:6px 14px 6px 8px;
-    cursor:pointer; transition:background .2s;
-    text-decoration:none; user-select:none;
-  }
+  .user-badge { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); border-radius:32px; padding:6px 14px 6px 8px; cursor:pointer; transition:background .2s; text-decoration:none; user-select:none; }
   .user-badge:hover { background:rgba(255,255,255,0.2); }
-
-  .user-avatar {
-    width:32px; height:32px; border-radius:50%;
-    background:#e87d2a; display:flex; align-items:center;
-    justify-content:center; font-weight:700; font-size:14px;
-    color:var(--white); flex-shrink:0;
-  }
+  .user-avatar { width:32px; height:32px; border-radius:50%; background:#e87d2a; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; color:var(--white); flex-shrink:0; }
   .user-name { font-size:13px; font-weight:500; color:var(--white); }
-
-  .user-caret {
-    width:14px; height:14px; color:rgba(255,255,255,0.7);
-    transition:transform .2s; flex-shrink:0;
-    fill:none; stroke:currentColor; stroke-width:2.5;
-  }
+  .user-caret { width:14px; height:14px; color:rgba(255,255,255,0.7); transition:transform .2s; flex-shrink:0; fill:none; stroke:currentColor; stroke-width:2.5; }
   .user-menu.open .user-caret { transform:rotate(180deg); }
-
-  /* --- Dropdown Panel --- */
-  .user-dropdown {
-    position:absolute; top:calc(100% + 10px); right:0;
-    background:#fff; border-radius:12px; min-width:200px;
-    box-shadow:0 8px 32px rgba(10,20,60,0.18);
-    border:1px solid rgba(0,0,0,0.07);
-    overflow:hidden; display:none; z-index:300;
-    animation:dropIn .18s ease;
-  }
-  @keyframes dropIn {
-    from { opacity:0; transform:translateY(-6px); }
-    to   { opacity:1; transform:translateY(0); }
-  }
+  .user-dropdown { position:absolute; top:calc(100% + 10px); right:0; background:#fff; border-radius:12px; min-width:200px; box-shadow:0 8px 32px rgba(10,20,60,0.18); border:1px solid rgba(0,0,0,0.07); overflow:hidden; display:none; z-index:300; animation:dropIn .18s ease; }
+  @keyframes dropIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
   .user-menu.open .user-dropdown { display:block; }
-
-  .dropdown-info {
-    padding:14px 16px 12px;
-    border-bottom:1px solid #f0f2f6;
-  }
-  .dropdown-info .d-name {
-    font-size:13px; font-weight:700; color:#1a2e5a;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  }
-  .dropdown-info .d-role {
-    font-size:11px; color:#9eadc8; margin-top:2px;
-  }
-
-  .dropdown-item {
-    display:flex; align-items:center; gap:10px;
-    padding:11px 16px; font-size:13px; font-weight:500;
-    color:#1a2e5a; text-decoration:none; cursor:pointer;
-    transition:background .15s; border:none;
-    background:none; width:100%; font-family:inherit;
-  }
+  .dropdown-info { padding:14px 16px 12px; border-bottom:1px solid #f0f2f6; }
+  .dropdown-info .d-name { font-size:13px; font-weight:700; color:#1a2e5a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .dropdown-info .d-role { font-size:11px; color:#9eadc8; margin-top:2px; }
+  .dropdown-info .d-satker { font-size:11px; color:#1e6fbf; margin-top:3px; font-weight:600; }
+  .dropdown-item { display:flex; align-items:center; gap:10px; padding:11px 16px; font-size:13px; font-weight:500; color:#1a2e5a; text-decoration:none; cursor:pointer; transition:background .15s; border:none; background:none; width:100%; font-family:inherit; }
   .dropdown-item:hover { background:#f4f6fb; }
-  .dropdown-item svg {
-    width:16px; height:16px; flex-shrink:0;
-    fill:none; stroke:currentColor; stroke-width:2;
-    color:#9eadc8;
-  }
-
+  .dropdown-item svg { width:16px; height:16px; flex-shrink:0; fill:none; stroke:currentColor; stroke-width:2; color:#9eadc8; }
   .dropdown-divider { height:1px; background:#f0f2f6; margin:4px 0; }
-
-  .dropdown-item.logout {
-    color:#9b2222;
-    border-top:1px solid #f0f2f6;
-  }
+  .dropdown-item.logout { color:#9b2222; border-top:1px solid #f0f2f6; }
   .dropdown-item.logout:hover { background:#fce8e8; }
   .dropdown-item.logout svg { color:#e05252; }
   .hero { background:linear-gradient(135deg,var(--navy-dark) 0%,var(--navy-mid) 60%,var(--blue) 100%); padding:2.5rem 2rem 3.5rem; text-align:center; position:relative; overflow:hidden; }
@@ -178,8 +133,10 @@ $user = currentUser();
   .form-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:1.25rem; }
   .modal-overlay { position:fixed; inset:0; background:rgba(10,20,50,0.55); display:none; z-index:200; overflow-y:auto; }
   .modal-overlay.open { display:flex; align-items:flex-start; justify-content:center; padding:2rem 1rem; }
-  .modal { position:relative; z-index:201; background:var(--white); border-radius:16px; padding:2rem; width:100%; max-width:580px; box-shadow:0 20px 60px rgba(0,0,0,0.25); margin:2rem auto; }
+  .modal { position:relative; z-index:201; background:var(--white); border-radius:16px; padding:2rem; width:100%; max-width:640px; box-shadow:0 20px 60px rgba(0,0,0,0.25); margin:2rem auto; }
   .modal-title { font-size:18px; font-weight:700; color:var(--navy); margin-bottom:1.25rem; }
+  /* Section divider inside modal */
+  .modal-section { font-size:12px; font-weight:700; color:var(--blue); text-transform:uppercase; letter-spacing:.5px; grid-column:1/-1; padding:8px 0 4px; border-bottom:1px solid var(--gray-200); margin-top:6px; }
   .file-list { display:flex; flex-direction:column; gap:10px; }
   .file-item { background:var(--white); border:1px solid var(--gray-200); border-radius:var(--radius); padding:1rem 1.25rem; display:flex; align-items:center; gap:14px; box-shadow:var(--shadow); }
   .file-icon { width:44px; height:44px; border-radius:10px; background:var(--blue-pale); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
@@ -208,70 +165,48 @@ $user = currentUser();
 <body>
 
 <header>
-  <!-- Logo -->
   <div style="display:flex;align-items:center;gap:12px">
     <div class="logo-emblem">
-      <img src="logo.png" alt="SIPATEN"
-           style="width:42px;height:42px;object-fit:contain;border-radius:50%;">
+      <img src="logo.png" alt="SIPATEN" style="width:42px;height:42px;object-fit:contain;border-radius:50%;">
     </div>
     <div class="logo-text">
       <div class="brand">SIPATEN</div>
       <div class="tagline">Sistem Penyimpanan Arsip Kepegawaian Terintegrasi dan Nyaman</div>
     </div>
   </div>
- 
-  <!-- User Dropdown (sudut kanan) -->
+
   <div class="header-right">
+    <?php if ($userSatkerNama): ?>
+      <span class="satker-badge">🏢 <?= htmlspecialchars($userSatkerNama) ?></span>
+    <?php endif; ?>
+
     <div class="user-menu" id="user-menu">
- 
-      <!-- Tombol trigger -->
       <div class="user-badge" onclick="toggleUserMenu(event)">
-        <div class="user-avatar">
-          <?= htmlspecialchars($user['inisial'] ?? 'A') ?>
-        </div>
-        <span class="user-name">
-          <?= htmlspecialchars($user['nama'] ?? 'Admin') ?>
-        </span>
-        <!-- Caret / panah bawah -->
-        <svg class="user-caret" viewBox="0 0 24 24">
-          <polyline points="6 9 12 15 18 9"/>
-        </svg>
+        <div class="user-avatar"><?= htmlspecialchars($user['inisial'] ?? 'A') ?></div>
+        <span class="user-name"><?= htmlspecialchars($user['nama'] ?? 'Admin') ?></span>
+        <svg class="user-caret" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
- 
-      <!-- Panel dropdown -->
+
       <div class="user-dropdown">
-        <!-- Info nama & role -->
         <div class="dropdown-info">
           <div class="d-name"><?= htmlspecialchars($user['nama'] ?? 'Admin') ?></div>
-          <div class="d-role">
-            <?= isAdmin() ? 'Administrator' : 'Pengguna' ?>
-          </div>
+          <div class="d-role"><?= isAdmin() ? 'Administrator' : ucfirst($user['role'] ?? 'Operator') ?></div>
+          <?php if ($userSatkerNama): ?>
+            <div class="d-satker">🏢 <?= htmlspecialchars($userSatkerNama) ?></div>
+          <?php endif; ?>
         </div>
- 
-        <!-- Menu: Profil Saya -->
         <a href="profile.php" class="dropdown-item">
-          <svg viewBox="0 0 24 24">
-            <circle cx="12" cy="8" r="4"/>
-            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-          </svg>
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
           Profil Saya
         </a>
- 
         <div class="dropdown-divider"></div>
- 
-        <!-- Menu: Keluar -->
         <a href="logout.php" class="dropdown-item logout">
-          <svg viewBox="0 0 24 24">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-            <polyline points="16 17 21 12 16 7"/>
-            <line x1="21" y1="12" x2="9" y2="12"/>
-          </svg>
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           Keluar
         </a>
       </div>
- 
-    </div><!-- /.user-menu -->
-  </div><!-- /.header-right -->
+    </div>
+  </div>
 </header>
 
 <!-- ────────── HOME PAGE ────────── -->
@@ -313,47 +248,32 @@ $user = currentUser();
         <div class="icon-wrap"><svg viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg></div>
         <span class="menu-label">Arsip File</span>
       </div>
-     <?php if (isAdmin()): ?>
- <div class="menu-card" onclick="window.location.href='dokumen.php'">
-  <div class="icon-wrap"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-  <span class="menu-label">Arsip Dokumen</span>
-</div>
-<div class="menu-card" onclick="window.location.href='pengingat.php'">
-  <div class="icon-wrap"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-  <span class="menu-label">Pengingat Pensiun</span>
-</div>
-<?php if (isAdmin()): ?>
-<div class="menu-card" onclick="window.location.href='aktivitas.php'">
-  <div class="icon-wrap"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-  <span class="menu-label">Riwayat Aktivitas</span>
-</div>
-<?php endif; ?>
-<div class="menu-card" onclick="window.location.href='users.php'">
-  <div class="icon-wrap">
-    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-  </div>
-  <span class="menu-label">Kelola User</span>
-</div>
-     <div class="menu-card" onclick="window.location.href='satker.php'">
-  <div class="icon-wrap">
-    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-  </div>
-  <span class="menu-label">Kelola Satker</span>
-</div>
-<div class="menu-card" onclick="window.location.href='profile.php'">
-  <div class="icon-wrap">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-  </div>
-  <span class="menu-label">Profil Saya</span>
-</div>
-<?php else: ?>
-<div class="menu-card" onclick="window.location.href='profile.php'">
-  <div class="icon-wrap">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-  </div>
-  <span class="menu-label">Profil Saya</span>
-</div>
-<?php endif; ?>
+      <?php if (isAdmin()): ?>
+      <div class="menu-card" onclick="window.location.href='dokumen.php'">
+        <div class="icon-wrap"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <span class="menu-label">Arsip Dokumen</span>
+      </div>
+      <div class="menu-card" onclick="window.location.href='pengingat.php'">
+        <div class="icon-wrap"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+        <span class="menu-label">Pengingat Pensiun</span>
+      </div>
+      <div class="menu-card" onclick="window.location.href='aktivitas.php'">
+        <div class="icon-wrap"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <span class="menu-label">Riwayat Aktivitas</span>
+      </div>
+      <div class="menu-card" onclick="window.location.href='users.php'">
+        <div class="icon-wrap"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <span class="menu-label">Kelola User</span>
+      </div>
+      <div class="menu-card" onclick="window.location.href='satker.php'">
+        <div class="icon-wrap"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+        <span class="menu-label">Kelola Satker</span>
+      </div>
+      <?php endif; ?>
+      <div class="menu-card" onclick="window.location.href='profile.php'">
+        <div class="icon-wrap"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+        <span class="menu-label">Profil Saya</span>
+      </div>
     </div>
   </main>
 </div>
@@ -369,9 +289,9 @@ $user = currentUser();
     <div class="table-wrapper">
       <div class="table-toolbar">
         <span style="font-size:14px;font-weight:700;color:var(--navy)">Daftar Satuan Kerja</span>
-<?php if(canEdit()):?>
-<a href="satker.php" style="padding:6px 14px;background:var(--blue);color:#fff;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">⚙️ Kelola Satker</a>
-<?php endif;?>
+        <?php if(canEdit()):?>
+        <a href="satker.php" style="padding:6px 14px;background:var(--blue);color:#fff;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">⚙️ Kelola Satker</a>
+        <?php endif;?>
       </div>
       <table><thead><tr><th>No</th><th>Satuan Kerja</th><th>Total</th><th>Aktif</th></tr></thead>
         <tbody id="satker-tbody"><tr><td colspan="4" class="loading">Memuat...</td></tr></tbody>
@@ -392,7 +312,12 @@ $user = currentUser();
         <input type="text" id="pegawai-search" placeholder="Cari NIP / Nama..." oninput="loadPegawai(this.value)">
         <button class="btn btn-primary" onclick="openModalPegawai()">+ Tambah Pegawai</button>
       </div>
-      <table><thead><tr><th>NIP</th><th>Nama</th><th>Jabatan</th><th>Gol.</th><th>Satker</th><th>Status</th><th>Aksi</th></tr></thead>
+      <table>
+        <thead>
+          <tr>
+            <th>NIP</th><th>Nama</th><th>Jabatan</th><th>Gol.</th><th>Satker</th><th>Status</th><th>Aksi</th>
+          </tr>
+        </thead>
         <tbody id="pegawai-tbody"><tr><td colspan="7" class="loading">Memuat data...</td></tr></tbody>
       </table>
     </div>
@@ -497,44 +422,97 @@ $user = currentUser();
              style="padding:10px 14px;border:1px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;outline:none;width:280px;transition:border-color .2s"
              onfocus="this.style.borderColor='var(--blue-light)'" onblur="this.style.borderColor='var(--gray-200)'">
       <button class="btn btn-primary" onclick="document.getElementById('file-upload').click()">+ Upload Dokumen</button>
-      <input type="file" id="file-upload" style="display:none"
-             accept=".pdf,.xlsx,.xls,.docx,.doc,.png,.jpg,.jpeg"
-             onchange="uploadFile(this)">
+      <input type="file" id="file-upload" style="display:none" accept=".pdf,.xlsx,.xls,.docx,.doc,.png,.jpg,.jpeg" onchange="uploadFile(this)">
     </div>
     <div class="file-list" id="arsip-list"><div class="loading">Memuat arsip...</div></div>
   </main>
 </div>
 
-<!-- ──── MODAL TAMBAH/EDIT PEGAWAI ──── -->
-<!-- ──── MODAL TAMBAH/EDIT PEGAWAI ──── -->
+<!-- ══════════════════════════════════════════════════════════
+     MODAL TAMBAH/EDIT PEGAWAI — dengan KTP, NPWP, TASPEN
+     ══════════════════════════════════════════════════════════ -->
 <div class="modal-overlay" id="modal-pegawai">
-  <div class="modal" style="max-width:620px;overflow-y:auto;margin:auto">
-   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
-  <p class="modal-title" id="modal-pegawai-title" style="margin:0">Tambah Data Pegawai Baru</p>
-  <button onclick="closeModal('modal-pegawai')" style="background:none;border:none;cursor:pointer;font-size:20px;color:#9eadc8;line-height:1">✕</button>
-</div>
+  <div class="modal" style="max-width:660px;overflow-y:auto;margin:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
+      <p class="modal-title" id="modal-pegawai-title" style="margin:0">Tambah Data Pegawai Baru</p>
+      <button onclick="closeModal('modal-pegawai')" style="background:none;border:none;cursor:pointer;font-size:20px;color:#9eadc8;line-height:1">✕</button>
+    </div>
     <input type="hidden" id="pegawai-id">
     <div class="form-grid">
-      <div class="form-group"><label>NIP</label><input type="text" id="peg-nip" placeholder="18 digit NIP"></div>
-      <div class="form-group"><label>Nama Lengkap</label><input type="text" id="peg-nama" placeholder="Nama dan gelar"></div>
-      <div class="form-group"><label>Jabatan</label><input type="text" id="peg-jabatan" placeholder="Jabatan struktural/fungsional"></div>
-      <div class="form-group"><label>Pangkat/Golongan</label><select id="peg-golongan"><?= golonganOptions() ?></select></div>
-      <div class="form-group"><label>Unit Kerja / Satker</label><select id="peg-satker"><option value="">Pilih Satker</option></select></div>
-      <div class="form-group"><label>TMT PNS</label><input type="date" id="peg-tmt"></div>
-      <div class="form-group"><label>Status Pegawai</label>
+
+      <!-- ── Data Pokok ── -->
+      <div class="modal-section">📋 Data Pokok</div>
+      <div class="form-group">
+        <label>NIP</label>
+        <input type="text" id="peg-nip" placeholder="18 digit NIP">
+      </div>
+      <div class="form-group">
+        <label>Nama Lengkap</label>
+        <input type="text" id="peg-nama" placeholder="Nama dan gelar">
+      </div>
+      <div class="form-group">
+        <label>Jabatan</label>
+        <input type="text" id="peg-jabatan" placeholder="Jabatan struktural/fungsional">
+      </div>
+      <div class="form-group">
+        <label>Pangkat/Golongan</label>
+        <select id="peg-golongan"><?= golonganOptions() ?></select>
+      </div>
+      <div class="form-group">
+        <label>Unit Kerja / Satker</label>
+        <select id="peg-satker"><option value="">Pilih Satker</option></select>
+      </div>
+      <div class="form-group">
+        <label>TMT PNS</label>
+        <input type="date" id="peg-tmt">
+      </div>
+      <div class="form-group">
+        <label>Status Pegawai</label>
         <select id="peg-status">
           <option value="Aktif">Aktif</option>
           <option value="Pensiun">Pensiun</option>
           <option value="Dalam Proses">Dalam Proses</option>
         </select>
       </div>
-      <div class="form-group"><label>Nomor Telepon</label><input type="text" id="peg-telp" placeholder="08xx-xxxx-xxxx"></div>
-      <div class="form-group"><label>Email</label><input type="text" id="peg-email" placeholder="email@domain.com"></div>
-      <div class="form-group"><label>Tanggal Lahir</label><input type="date" id="peg-lahir"></div>
-      <div class="form-group full"><label>Alamat Lengkap</label>
-        <textarea id="peg-alamat" rows="3" placeholder="Alamat lengkap pegawai..." style="padding:10px 14px;border:1px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;outline:none;width:100%;transition:border-color .2s" onfocus="this.style.borderColor='var(--blue-light)'" onblur="this.style.borderColor='var(--gray-200)'"></textarea>
+      <div class="form-group">
+        <label>Tanggal Lahir</label>
+        <input type="date" id="peg-lahir">
       </div>
-    </div>
+
+      <!-- ── Identitas & Nomor Kepesertaan ── -->
+      <div class="modal-section">🪪 Identitas & Nomor Kepesertaan</div>
+      <div class="form-group">
+        <label>No. KTP</label>
+        <input type="text" id="peg-ktp" placeholder="16 digit NIK KTP" maxlength="16">
+      </div>
+      <div class="form-group">
+        <label>No. NPWP</label>
+        <input type="text" id="peg-npwp" placeholder="Contoh: 00.000.000.0-000.000" maxlength="30">
+      </div>
+      <div class="form-group">
+        <label>No. TASPEN</label>
+        <input type="text" id="peg-taspen" placeholder="Nomor kepesertaan TASPEN" maxlength="30">
+      </div>
+      <div class="form-group">
+        <label>Nomor Telepon</label>
+        <input type="text" id="peg-telp" placeholder="08xx-xxxx-xxxx">
+      </div>
+
+      <!-- ── Kontak & Alamat ── -->
+      <div class="modal-section">📍 Kontak & Alamat</div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="text" id="peg-email" placeholder="email@domain.com">
+      </div>
+      <div class="form-group"><!-- spacer --></div>
+      <div class="form-group full">
+        <label>Alamat Lengkap</label>
+        <textarea id="peg-alamat" rows="3" placeholder="Alamat lengkap pegawai..."
+          style="padding:10px 14px;border:1px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;outline:none;width:100%;transition:border-color .2s"
+          onfocus="this.style.borderColor='var(--blue-light)'" onblur="this.style.borderColor='var(--gray-200)'"></textarea>
+      </div>
+
+    </div><!-- /.form-grid -->
     <div class="form-actions">
       <button class="btn btn-outline" onclick="closeModal('modal-pegawai')">Batal</button>
       <button class="btn btn-primary" onclick="savePegawai()">Simpan Data</button>
@@ -597,32 +575,24 @@ $user = currentUser();
 
 <script>
 // ═══════════════════════════════════════════════════════
-//  SIPATEN Frontend JS — Terhubung ke API Backend
+//  SIPATEN Frontend JS
 // ═══════════════════════════════════════════════════════
-// ── User Dropdown Toggle ──────────────────────────────
 function toggleUserMenu(e) {
   e.stopPropagation();
   document.getElementById('user-menu').classList.toggle('open');
 }
-
-// Tutup dropdown kalau klik di luar
 document.addEventListener('click', function(e) {
   const menu = document.getElementById('user-menu');
-  if (menu && !menu.contains(e.target)) {
-    menu.classList.remove('open');
-  }
+  if (menu && !menu.contains(e.target)) menu.classList.remove('open');
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') document.getElementById('user-menu')?.classList.remove('open');
 });
 
-// Tutup dropdown kalau tekan Escape
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') {
-    document.getElementById('user-menu')?.classList.remove('open');
-  }
-});
 const API = 'api/index.php';
 const pages = ['home','ringkasan','data-pegawai','kenaikan-gaji','tunjangan','slks','arsip'];
 
-// ── Navigasi ──────────────────────────────────────────
+// ── Navigasi ────────────────────────────────────────
 function showPage(id) {
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
@@ -630,17 +600,16 @@ function showPage(id) {
   });
   const target = document.getElementById('page-' + id);
   if (target) { target.classList.add('active'); window.scrollTo(0,0); }
-  // Muat data sesuai halaman
-  if (id === 'ringkasan')      loadRingkasan();
-  if (id === 'data-pegawai')   loadPegawai();
-  if (id === 'kenaikan-gaji')  { loadKGB(); loadSatkerOptions(); }
-  if (id === 'tunjangan')      loadTunjangan();
-  if (id === 'slks')           loadSLKS();
-  if (id === 'arsip') window.location.href = 'arsip.php';
+  if (id === 'ringkasan')     loadRingkasan();
+  if (id === 'data-pegawai')  loadPegawai();
+  if (id === 'kenaikan-gaji') { loadKGB(); loadSatkerOptions(); }
+  if (id === 'tunjangan')     loadTunjangan();
+  if (id === 'slks')          loadSLKS();
+  if (id === 'arsip')         window.location.href = 'arsip.php';
 }
 function goHome() { showPage('home'); }
 
-// ── Toast ────────────────────────────────────────────
+// ── Toast ──────────────────────────────────────────
 function toast(msg, type='success') {
   const el = document.getElementById('toast');
   el.textContent = msg;
@@ -648,7 +617,7 @@ function toast(msg, type='success') {
   setTimeout(() => el.classList.remove('show'), 3000);
 }
 
-// ── API fetch helper ──────────────────────────────────
+// ── API helpers ─────────────────────────────────────
 async function api(module, action, params={}) {
   const url = new URL(API, location.href);
   url.searchParams.set('module', module);
@@ -658,7 +627,6 @@ async function api(module, action, params={}) {
   if (r.status === 401) { location.href = 'login.php'; return null; }
   return r.json();
 }
-
 async function apiPost(module, action, body={}) {
   const url = `${API}?module=${module}&action=${action}`;
   const r = await fetch(url, {
@@ -670,7 +638,7 @@ async function apiPost(module, action, body={}) {
   return r.json();
 }
 
-// ── Badge HTML ────────────────────────────────────────
+// ── Badge HTML ──────────────────────────────────────
 function badge(txt) {
   const map = {
     'Aktif':'badge-active','Selesai':'badge-active','Sangat Baik':'badge-active','Baik':'badge-active',
@@ -681,7 +649,7 @@ function badge(txt) {
   return `<span class="badge ${cls}">${txt}</span>`;
 }
 
-// ═══════════════ RINGKASAN ═══════════════════════════
+// ═══════════════ RINGKASAN ════════════════════════
 async function loadRingkasan() {
   const res = await api('ringkasan','list');
   if (!res?.success) return;
@@ -699,14 +667,18 @@ async function loadRingkasan() {
   `).join('') || '<tr><td colspan="4">Tidak ada data</td></tr>';
 }
 
-// ═══════════════ PEGAWAI ═════════════════════════════
+// ═══════════════ PEGAWAI ══════════════════════════
 async function loadPegawai(q='') {
   document.getElementById('pegawai-tbody').innerHTML = '<tr><td colspan="7" class="loading">Memuat...</td></tr>';
   const res = await api('pegawai','list',{q});
   if (!res?.success) return;
   document.getElementById('pegawai-tbody').innerHTML = res.data.map(p => `
     <tr>
-      <td><a href="profil_pegawai.php?id=${p.id}" style="color:var(--blue);font-weight:600;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${p.nip}</a></td><td><a href="profil_pegawai.php?id=${p.id}" style="color:var(--navy);font-weight:600;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${p.nama}</a></td><td>${p.jabatan||'-'}</td>
+      <td><a href="profil_pegawai.php?id=${p.id}" style="color:var(--blue);font-weight:600;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${p.nip}</a></td>
+      <td><a href="profil_pegawai.php?id=${p.id}" style="color:var(--navy);font-weight:600;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${p.nama}</a></td>
+      <td>${p.jabatan||'-'}</td>
+      <td>${p.golongan||'-'}</td>
+      <td>${p.satker||'-'}</td>
       <td>${badge(p.status)}</td>
       <td style="white-space:nowrap">
         <button class="btn btn-sm btn-outline" onclick="editPegawai(${p.id})">Edit</button>
@@ -726,10 +698,11 @@ async function loadSatkerOptions() {
 function openModalPegawai() {
   document.getElementById('modal-pegawai-title').textContent = 'Tambah Data Pegawai Baru';
   document.getElementById('pegawai-id').value = '';
-  ['peg-nip','peg-nama','peg-jabatan','peg-tmt','peg-telp','peg-email','peg-lahir','peg-alamat'].forEach(id => document.getElementById(id).value = '');
+  ['peg-nip','peg-nama','peg-jabatan','peg-tmt','peg-telp','peg-email','peg-lahir','peg-alamat',
+   'peg-ktp','peg-npwp','peg-taspen'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('peg-golongan').value = '';
-  document.getElementById('peg-satker').value = '';
-  document.getElementById('peg-status').value = 'Aktif';
+  document.getElementById('peg-satker').value   = '';
+  document.getElementById('peg-status').value   = 'Aktif';
   loadSatkerOptions();
   openModal('modal-pegawai');
 }
@@ -742,16 +715,20 @@ async function editPegawai(id) {
   document.getElementById('pegawai-id').value    = p.id;
   document.getElementById('peg-nip').value       = p.nip;
   document.getElementById('peg-nama').value      = p.nama;
-  document.getElementById('peg-jabatan').value   = p.jabatan || '';
-  document.getElementById('peg-golongan').value  = p.golongan || '';
-  document.getElementById('peg-tmt').value       = p.tmt_pns || '';
+  document.getElementById('peg-jabatan').value   = p.jabatan    || '';
+  document.getElementById('peg-golongan').value  = p.golongan   || '';
+  document.getElementById('peg-tmt').value       = p.tmt_pns    || '';
   document.getElementById('peg-status').value    = p.status;
   document.getElementById('peg-telp').value      = p.no_telepon || '';
-  document.getElementById('peg-email').value     = p.email || '';
+  document.getElementById('peg-email').value     = p.email      || '';
   document.getElementById('peg-lahir').value     = p.tanggal_lahir || '';
-  document.getElementById('peg-alamat').value    = p.alamat || '';
+  document.getElementById('peg-alamat').value    = p.alamat     || '';
+  // Kolom baru
+  document.getElementById('peg-ktp').value       = p.no_ktp     || '';
+  document.getElementById('peg-npwp').value      = p.no_npwp    || '';
+  document.getElementById('peg-taspen').value    = p.no_taspen  || '';
   await loadSatkerOptions();
-  document.getElementById('peg-satker').value    = p.satker_id || '';
+  document.getElementById('peg-satker').value    = p.satker_id  || '';
   openModal('modal-pegawai');
 }
 
@@ -769,6 +746,10 @@ async function savePegawai() {
     email:         document.getElementById('peg-email').value,
     tanggal_lahir: document.getElementById('peg-lahir').value,
     alamat:        document.getElementById('peg-alamat').value,
+    // Kolom baru
+    no_ktp:        document.getElementById('peg-ktp').value,
+    no_npwp:       document.getElementById('peg-npwp').value,
+    no_taspen:     document.getElementById('peg-taspen').value,
   };
   const res = await apiPost('pegawai','save',body);
   if (res?.success) {
@@ -787,7 +768,7 @@ async function deletePegawai(id, nama) {
   else toast(res?.message || 'Gagal menghapus','error');
 }
 
-// ═══════════════ KENAIKAN GAJI BERKALA ══════════════
+// ═══════════════ KGB ══════════════════════════════
 async function loadKGB(q='') {
   q = q || document.getElementById('kgb-search')?.value || '';
   const bulan = document.getElementById('kgb-bulan')?.value || '';
@@ -798,7 +779,7 @@ async function loadKGB(q='') {
   document.getElementById('kgb-tbody').innerHTML = res.data.map(k => `
     <tr>
       <td>${k.nama}</td><td>${k.nip}</td><td>${k.gol_lama}</td><td>${k.gol_baru}</td>
-      <td>${k.tmt}</td><td>${k.no_sk||'-'}</td><td>${badge(k.status)}</td>
+      <td>${k.tmt}</td><td>${k.no_sk||'-'}</td><td>${badge(k.status||'Proses')}</td>
       <td style="white-space:nowrap">
         <button class="btn btn-sm btn-outline" onclick="editKGB(${JSON.stringify(k).replace(/"/g,'&quot;')})">Edit</button>
         <button class="btn btn-sm btn-danger" onclick="deleteKGB(${k.id})">Hapus</button>
@@ -808,13 +789,13 @@ async function loadKGB(q='') {
 }
 
 function editKGB(k) {
-  document.getElementById('kgb-id').value    = k.id;
-  document.getElementById('kgb-nip').value   = k.nip;
-  document.getElementById('kgb-nama').value  = k.nama;
+  document.getElementById('kgb-id').value       = k.id;
+  document.getElementById('kgb-nip').value      = k.nip;
+  document.getElementById('kgb-nama').value     = k.nama;
   document.getElementById('kgb-gol-lama').value = k.gol_lama;
   document.getElementById('kgb-gol-baru').value = k.gol_baru;
-  document.getElementById('kgb-tmt').value   = k.tmt;
-  document.getElementById('kgb-nosk').value  = k.no_sk || '';
+  document.getElementById('kgb-tmt').value      = k.tmt;
+  document.getElementById('kgb-nosk').value     = k.no_sk || '';
 }
 
 function resetKGBForm() {
@@ -823,7 +804,6 @@ function resetKGBForm() {
   document.getElementById('kgb-gol-baru').value='';
 }
 
-// Auto-isi nama berdasarkan NIP
 document.addEventListener('DOMContentLoaded', () => {
   const nipEl = document.getElementById('kgb-nip');
   if (nipEl) {
@@ -858,7 +838,7 @@ async function deleteKGB(id) {
   else toast(res?.message||'Gagal','error');
 }
 
-// ═══════════════ TUNJANGAN ═══════════════════════════
+// ═══════════════ TUNJANGAN ════════════════════════
 async function loadTunjangan(q='') {
   document.getElementById('tunj-tbody').innerHTML='<tr><td colspan="7" class="loading">Memuat...</td></tr>';
   const res = await api('tunjangan','list',{q});
@@ -866,7 +846,7 @@ async function loadTunjangan(q='') {
   document.getElementById('tunj-tbody').innerHTML = res.data.map(t=>`
     <tr>
       <td>${t.nama}</td><td>${t.nip}</td><td>${t.jenis_tunjangan}</td>
-      <td>${t.nominal_fmt}</td><td>${t.periode||'-'}</td><td>${badge(t.status)}</td>
+      <td>Rp ${t.nominal_fmt}</td><td>${t.periode||'-'}</td><td>${badge(t.status)}</td>
       <td style="white-space:nowrap">
         <button class="btn btn-sm btn-outline" onclick="editTunjangan(${JSON.stringify(t).replace(/"/g,'&quot;')})">Edit</button>
         <button class="btn btn-sm btn-danger" onclick="deleteTunjangan(${t.id})">Hapus</button>
@@ -914,7 +894,7 @@ async function deleteTunjangan(id) {
   else toast(res?.message||'Gagal','error');
 }
 
-// ═══════════════ SLKS ═════════════════════════════════
+// ═══════════════ SLKS ═════════════════════════════
 async function loadSLKS(q='') {
   document.getElementById('slks-tbody').innerHTML='<tr><td colspan="8" class="loading">Memuat...</td></tr>';
   const res = await api('slks','list',{q});
@@ -941,11 +921,11 @@ function openModalSLKS() {
 }
 
 function editSLKS(s) {
-  document.getElementById('slks-id').value      = s.id;
-  document.getElementById('slks-nip').value     = s.nip;
-  document.getElementById('slks-periode').value = s.periode;
-  document.getElementById('slks-skp').value     = s.nilai_skp;
-  document.getElementById('slks-perilaku').value= s.perilaku;
+  document.getElementById('slks-id').value       = s.id;
+  document.getElementById('slks-nip').value      = s.nip;
+  document.getElementById('slks-periode').value  = s.periode;
+  document.getElementById('slks-skp').value      = s.nilai_skp;
+  document.getElementById('slks-perilaku').value = s.perilaku;
   openModal('modal-slks');
 }
 
@@ -969,7 +949,7 @@ async function deleteSLKS(id) {
   else toast(res?.message||'Gagal','error');
 }
 
-// ═══════════════ ARSIP ════════════════════════════════
+// ═══════════════ ARSIP ════════════════════════════
 async function loadArsip(q='') {
   document.getElementById('arsip-list').innerHTML='<div class="loading">Memuat arsip...</div>';
   const res = await api('arsip','list',{q});
@@ -1010,7 +990,7 @@ async function deleteArsip(id,nama) {
   else toast(res?.message||'Gagal','error');
 }
 
-// ═══════════════ SEARCH ═══════════════════════════════
+// ═══════════════ SEARCH ═══════════════════════════
 async function handleSearch(val) {
   const box = document.getElementById('search-results');
   if(!val||val.length<2){box.style.display='none';return;}
@@ -1031,7 +1011,7 @@ document.addEventListener('click', e => {
     document.getElementById('search-results').style.display='none';
 });
 
-// ═══════════════ MODAL ════════════════════════════════
+// ═══════════════ MODAL ════════════════════════════
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 function closeModalOutside(e, id) { if(e.target===document.getElementById(id)) closeModal(id); }
