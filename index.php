@@ -309,9 +309,16 @@ if (!isAdmin() && !empty($_SESSION['user_id'])) {
     <p class="page-title">Data Pegawai</p>
     <div class="table-wrapper">
       <div class="table-toolbar">
-        <input type="text" id="pegawai-search" placeholder="Cari NIP / Nama..." oninput="loadPegawai(this.value)">
-        <button class="btn btn-primary" onclick="openModalPegawai()">+ Tambah Pegawai</button>
-      </div>
+  <div style="display:flex;gap:8px;flex:1;flex-wrap:wrap">
+    <input type="text" id="pegawai-search" placeholder="Cari NIP / Nama..." 
+           oninput="loadPegawai()" style="flex:1;min-width:180px">
+    <select id="pegawai-satker-filter" onchange="loadPegawai()" 
+            style="min-width:180px;padding:8px 32px 8px 14px;border:1px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:#fff;appearance:none;background-image:url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%239eadc8\' stroke-width=\'2\'%3E%3Cpath d=\'M6 9l6 6 6-6\'/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right 12px center">
+      <option value="">Semua Satker</option>
+    </select>
+  </div>
+  <button class="btn btn-primary" onclick="openModalPegawai()">+ Tambah Pegawai</button>
+</div>
       <table>
         <thead>
           <tr>
@@ -601,7 +608,7 @@ function showPage(id) {
   const target = document.getElementById('page-' + id);
   if (target) { target.classList.add('active'); window.scrollTo(0,0); }
   if (id === 'ringkasan')     loadRingkasan();
-  if (id === 'data-pegawai')  loadPegawai();
+  if (id === 'data-pegawai')   { loadPegawai(); loadPegawaiSatkerFilter(); }
   if (id === 'kenaikan-gaji') { loadKGB(); loadSatkerOptions(); }
   if (id === 'tunjangan')     loadTunjangan();
   if (id === 'slks')          loadSLKS();
@@ -668,9 +675,11 @@ async function loadRingkasan() {
 }
 
 // ═══════════════ PEGAWAI ══════════════════════════
-async function loadPegawai(q='') {
+async function loadPegawai() {
+  const q        = document.getElementById('pegawai-search')?.value || '';
+  const satker_id= document.getElementById('pegawai-satker-filter')?.value || '';
   document.getElementById('pegawai-tbody').innerHTML = '<tr><td colspan="7" class="loading">Memuat...</td></tr>';
-  const res = await api('pegawai','list',{q});
+  const res = await api('pegawai','list',{q, satker_id});
   if (!res?.success) return;
   document.getElementById('pegawai-tbody').innerHTML = res.data.map(p => `
     <tr>
@@ -693,6 +702,16 @@ async function loadSatkerOptions() {
   if (!res?.success) return;
   const opts = res.data.map(s => `<option value="${s.id}">${s.nama}</option>`).join('');
   document.getElementById('peg-satker').innerHTML = '<option value="">Pilih Satker</option>' + opts;
+}
+
+async function loadPegawaiSatkerFilter() {
+  const res = await api('satker','list');
+  if (!res?.success) return;
+  const sel = document.getElementById('pegawai-satker-filter');
+  if (!sel) return;
+  const current = sel.value;
+  sel.innerHTML = '<option value="">Semua Satker</option>' +
+    res.data.map(s => `<option value="${s.id}"${current==s.id?' selected':''}>${s.nama}</option>`).join('');
 }
 
 function openModalPegawai() {
