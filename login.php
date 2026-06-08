@@ -84,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
     <div>
       <div class="brand">SIKAPAS.RIAU</div>
-      <div class="tagline">Sistem Informasi Kepegawaian dan Administrasi<br>Pemasyarakatan Riau</div>
+      <div class="tagline">Sistem Informasi Kepegawaian dan Administrasi<br>Pemasyarakatan Kanwil Riau</div>
     </div>
   </div>
 
