@@ -131,10 +131,47 @@ body {
     position:relative;z-index:2;
     text-align:center;margin-bottom:22px;
 }
-.logo-section img.shield {
-    width:110px;height:auto;
-    margin-bottom:14px;
-    filter: drop-shadow(0 6px 16px rgba(0,0,0,0.6));
+/* Wrapper logo bertumpuk */
+.logo-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 150px;
+    height: 150px;
+    margin-bottom: 14px;
+}
+
+/* Logo Kementerian — di belakang, besar & samar */
+.logo-kemen-bg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 190px;
+    height: 190px;
+    object-fit: contain;
+    opacity: 0.22;
+    filter: brightness(4) saturate(0) blur(0.5px);
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Logo SDM depan — hapus background putih dengan luminosity */
+.logo-sdm {
+    position: relative;
+    z-index: 1;
+    width: 115px;
+    height: auto;
+    /* 
+       Cara terbaik hapus bg putih PNG tanpa Photoshop:
+       mix-blend-mode: darken  → putih (warna paling terang) jadi transparan
+       Karena card background lebih gelap dari putih, maka bg putih hilang
+    */
+    mix-blend-mode: darken;
+    filter: drop-shadow(0 8px 24px rgba(0,0,60,0.8))
+            drop-shadow(0 2px 8px rgba(0,10,50,0.6))
+            brightness(1.05) contrast(1.1);
 }
 .brand {
     font-size:36px;font-weight:800;color:#fff;
@@ -303,7 +340,13 @@ body {
     </svg>
 
     <div class="logo-section">
-        <img src="logo.png" alt="Logo SIKAPAS" class="shield">
+        <!-- Logo bertumpuk: Kementerian di belakang, logo.png di depan tanpa bg putih -->
+        <div class="logo-wrap">
+            <!-- Background: logo Kementerian besar & samar -->
+            <img src="logo.png" alt="" class="logo-kemen-bg" aria-hidden="true">
+            <!-- Foreground: logo sama, bg putih dihapus pakai CSS -->
+            <img src="logo.png" alt="Logo SIKAPAS" class="logo-sdm">
+        </div>
         <div class="brand">SIKAPAS.RIAU</div>
         <div class="brand-sub">Sistem Informasi Kepegawaian dan Administrasi<br>Pemasyarakatan Kanwil Riau</div>
         <div class="slogan">&#10022; Satu Sikap, Satu Data PAS Riau &#10022;</div>
