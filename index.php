@@ -70,7 +70,7 @@ if (!isAdmin() && !empty($_SESSION['user_id'])) {
   .hero::after { content:''; position:absolute; bottom:-40px; left:-60px; width:220px; height:220px; border-radius:50%; background:rgba(255,255,255,0.04); }
   .hero h1 { font-size:18px; font-weight:600; color:rgba(255,255,255,0.85); margin-bottom:4px; }
   .hero h2 { font-size:22px; font-weight:700; color:var(--white); margin-bottom:1.5rem; }
-  .search-box { max-width:540px; margin:0 auto; position:relative; z-index:1; }
+  .search-box { max-width:350px; margin:0 auto; position:relative; z-index:1; }
   .search-box input { width:100%; padding:13px 20px 13px 48px; border-radius:32px; border:none; font-size:14px; font-family:inherit; background:var(--white); color:var(--text); box-shadow:0 4px 20px rgba(0,0,0,0.15); outline:none; transition:box-shadow .2s; }
   .search-box input:focus { box-shadow:0 4px 24px rgba(0,0,0,0.22); }
   .search-box input::placeholder { color:var(--gray-400); }
