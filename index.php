@@ -228,7 +228,7 @@ if (!isAdmin() && !empty($_SESSION['user_id'])) {
         <div class="icon-wrap"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
         <span class="menu-label">Ringkasan Kepegawaian</span>
       </div>
-      <div class="menu-card" onclick="showPage('data-pegawai')">
+      <div class="menu-card" onclick="window.location.href='pegawai_satker.php'">
         <div class="icon-wrap"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
         <span class="menu-label">Data Pegawai</span>
       </div>
