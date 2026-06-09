@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SIKAPAS.RIAU — Login</title>
+<title>SIKAPAS.RIAU &#8212; Login</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
@@ -63,7 +63,6 @@ body {
     background: #061437;
 }
 
-/* ---- BACKGROUND FOTO GEDUNG ---- */
 .bg-image {
     position: fixed;
     inset: 0;
@@ -73,20 +72,17 @@ body {
     background-position: center top;
     background-repeat: no-repeat;
 }
-/* Dark overlay gradient agar card tetap terbaca */
 .bg-image::after {
     content: '';
     position: absolute;
     inset: 0;
-    background:
-        linear-gradient(180deg,
-            rgba(4,14,50,0.72) 0%,
-            rgba(6,22,70,0.65) 40%,
-            rgba(4,12,40,0.80) 100%
-        );
+    background: linear-gradient(180deg,
+        rgba(4,14,50,0.74) 0%,
+        rgba(6,22,70,0.62) 40%,
+        rgba(4,12,40,0.82) 100%
+    );
 }
 
-/* ---- BOKEH ---- */
 .bokeh { position:fixed;inset:0;z-index:1;pointer-events:none; }
 .dot {
     position:absolute;border-radius:50%;
@@ -96,7 +92,6 @@ body {
 }
 @keyframes twinkle{from{opacity:.1;transform:scale(1);}to{opacity:.55;transform:scale(1.5);}}
 
-/* ---- PAGE WRAP ---- */
 .page-wrap {
     position:relative;z-index:2;
     display:flex;flex-direction:column;align-items:center;
@@ -104,7 +99,6 @@ body {
     min-height:100vh;justify-content:center;
 }
 
-/* ---- CARD ---- */
 .card {
     width:100%;max-width:500px;
     background: rgba(210,228,255,0.13);
@@ -126,7 +120,6 @@ body {
     border-radius:100%;
 }
 
-/* ---- WATERMARK RING ---- */
 .wm {
     position:absolute;top:50%;left:50%;
     transform:translate(-50%,-50%);
@@ -134,7 +127,6 @@ body {
     opacity:0.07;pointer-events:none;z-index:0;
 }
 
-/* ---- LOGO SECTION ---- */
 .logo-section {
     position:relative;z-index:2;
     text-align:center;margin-bottom:22px;
@@ -162,9 +154,7 @@ body {
     color:#fff;font-size:13px;font-weight:600;font-style:italic;
 }
 
-/* ---- FORM ---- */
 .form-body { position:relative;z-index:2; }
-
 .field-group { margin-bottom:15px; }
 .field-label {
     display:block;color:rgba(255,255,255,0.9);
@@ -208,7 +198,6 @@ body {
     stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;
 }
 
-/* ---- BUTTONS ---- */
 .btn-masuk {
     width:100%;margin-top:6px;
     padding:14px 20px;border:none;border-radius:13px;
@@ -242,7 +231,6 @@ body {
 .btn-sso:hover{background:#fff;transform:translateY(-1px);}
 .btn-sso svg{width:16px;height:16px;stroke:#1659b0;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 
-/* ---- ERROR ---- */
 .alert-err {
     margin-bottom:14px;padding:11px 13px;
     border-radius:11px;
@@ -253,7 +241,6 @@ body {
 }
 .alert-err svg{flex-shrink:0;width:15px;height:15px;stroke:#ff7070;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 
-/* ---- CARD FOOTER ---- */
 .card-foot {
     position:relative;z-index:2;
     margin-top:20px;padding-top:16px;
@@ -263,7 +250,6 @@ body {
 .card-foot svg{width:20px;height:20px;stroke:rgba(255,255,255,0.5);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;margin-bottom:6px;}
 .card-foot p{color:rgba(255,255,255,0.6);font-size:11.5px;line-height:1.7;}
 
-/* ---- BOTTOM BAR ---- */
 .bot-bar {
     position:fixed;bottom:0;left:0;right:0;z-index:10;
     background:rgba(6,16,52,0.85);
@@ -280,7 +266,6 @@ body {
 .bar-item:not(:last-child){border-right:1px solid rgba(255,255,255,0.13);}
 .bar-item svg{width:15px;height:15px;stroke:rgba(170,200,255,0.85);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
 
-/* loading */
 .spin{display:none;width:16px;height:16px;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:rot .7s linear infinite;}
 @keyframes rot{to{transform:rotate(360deg);}}
 .btn-masuk.loading .spin{display:inline-block;}
@@ -296,15 +281,12 @@ body {
 </head>
 <body>
 
-<!-- BG GEDUNG -->
 <div class="bg-image"></div>
-<!-- BOKEH -->
 <div class="bokeh" id="bokeh"></div>
 
 <div class="page-wrap">
 <div class="card">
 
-    <!-- Watermark ring SVG -->
     <svg class="wm" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle cx="150" cy="150" r="145" stroke="white" stroke-width="1.5"/>
         <circle cx="150" cy="150" r="115" stroke="white" stroke-width="1"/>
@@ -320,21 +302,19 @@ body {
         </text>
     </svg>
 
-    <!-- LOGO -->
     <div class="logo-section">
         <img src="logo.png" alt="Logo SIKAPAS" class="shield">
         <div class="brand">SIKAPAS.RIAU</div>
         <div class="brand-sub">Sistem Informasi Kepegawaian dan Administrasi<br>Pemasyarakatan Kanwil Riau</div>
-        <div class="slogan">✦ Satu Sikap, Satu Data PAS Riau ✦</div>
+        <div class="slogan">&#10022; Satu Sikap, Satu Data PAS Riau &#10022;</div>
     </div>
 
-    <!-- FORM -->
     <div class="form-body">
 
-        <?php if (): ?>
+        <?php if ($error): ?>
         <div class="alert-err">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            <?= htmlspecialchars() ?>
+            <?= htmlspecialchars($error) ?>
         </div>
         <?php endif; ?>
 
@@ -348,7 +328,7 @@ body {
                     </span>
                     <input type="text" name="username" class="form-input"
                         placeholder="Masukkan username"
-                        value="<?= htmlspecialchars(['username'] ?? '') ?>"
+                        value="<?= htmlspecialchars($_POST['username'] ?? '') ?>"
                         autocomplete="username" required autofocus>
                 </div>
             </div>
@@ -387,13 +367,12 @@ body {
 
     <div class="card-foot">
         <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        <p>© 2026 SIKAPAS.RIAU — Kanwil Ditjenpas Riau<br>Kementerian Imigrasi &amp; Pemasyarakatan</p>
+        <p>&#169; 2026 SIKAPAS.RIAU &#8212; Kanwil Ditjenpas Riau<br>Kementerian Imigrasi &amp; Pemasyarakatan</p>
     </div>
 
 </div>
 </div>
 
-<!-- BOTTOM BAR -->
 <div class="bot-bar">
     <div class="bar-item">
         <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -410,34 +389,33 @@ body {
 </div>
 
 <script>
-// Bokeh
 (function(){
-    const c=document.getElementById('bokeh');
-    for(let i=0;i<30;i++){
-        const d=document.createElement('div');
+    var c=document.getElementById('bokeh');
+    for(var i=0;i<30;i++){
+        var d=document.createElement('div');
         d.className='dot';
-        const s=Math.random()*3+1.2;
-        d.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${(Math.random()*5+3).toFixed(1)}s;--dl:-${(Math.random()*5).toFixed(1)}s;`;
+        var s=(Math.random()*3+1.2).toFixed(1);
+        d.style.cssText='width:'+s+'px;height:'+s+'px;left:'+(Math.random()*100).toFixed(1)+'%;top:'+(Math.random()*100).toFixed(1)+'%;--d:'+(Math.random()*5+3).toFixed(1)+'s;--dl:-'+(Math.random()*5).toFixed(1)+'s;';
         c.appendChild(d);
     }
 })();
 
-// Eye toggle
-const pw=document.getElementById('pw');
-const eb=document.getElementById('eyeBtn');
-const ei=document.getElementById('eyeIco');
-let sh=false;
-eb.addEventListener('click',()=>{
+var pw=document.getElementById('pw');
+var eb=document.getElementById('eyeBtn');
+var ei=document.getElementById('eyeIco');
+var sh=false;
+eb.addEventListener('click',function(){
     sh=!sh;
     pw.type=sh?'text':'password';
-    ei.innerHTML=sh
-        ? `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>`
-        : `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+    if(sh){
+        ei.innerHTML='<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+    } else {
+        ei.innerHTML='<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+    }
 });
 
-// Loading
-document.getElementById('frm').addEventListener('submit',()=>{
-    const b=document.getElementById('sbtn');
+document.getElementById('frm').addEventListener('submit',function(){
+    var b=document.getElementById('sbtn');
     b.classList.add('loading');
     document.getElementById('btnTxt').textContent='Memproses...';
 });
