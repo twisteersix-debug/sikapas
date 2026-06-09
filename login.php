@@ -196,36 +196,40 @@ body {
 
 /* Shield logo wrapper — dua logo bertumpuk */
 .shield-wrap {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     margin-bottom: 18px;
     position: relative;
+    width: 130px;
+    height: 148px;
 }
 
-/* Logo Kementerian (belakang / background) */
+/* Logo Kementerian (belakang, besar & samar) */
 .logo-kemen {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 148px;
-    height: 148px;
+    width: 165px;
+    height: 165px;
     object-fit: contain;
-    opacity: 0.22;
-    filter: brightness(2.5) saturate(0);
+    opacity: 0.20;
+    filter: brightness(3) saturate(0.15) blur(0.3px);
     z-index: 0;
     pointer-events: none;
+    border-radius: 50%;
 }
 
-/* Logo SDM (depan) — hilangkan bg putih pakai mix-blend-mode */
+/* Logo SDM SVG (depan) — tampilan asli tanpa blend */
 .shield-svg {
     width: 110px;
     height: 128px;
     position: relative;
     z-index: 1;
-    filter:
-        drop-shadow(0 8px 20px rgba(0,0,0,0.55))
-        drop-shadow(0 0 1px rgba(0,0,0,0.3));
-    mix-blend-mode: screen;
+    filter: drop-shadow(0 8px 24px rgba(0,0,0,0.60))
+            drop-shadow(0 2px 6px rgba(0,0,0,0.40));
+    overflow: visible;
 }
 
 .brand-name {
