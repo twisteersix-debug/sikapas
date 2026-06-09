@@ -57,9 +57,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     background:#fff;
     border-radius:24px;
     padding:3rem;
-    width:100%;
-    max-width:600px;
-    box-shadow:0 25px 80px rgba(0,0,0,.25);
+    width:80%;
+    max-width:300px;
+    box-shadow:0 25px 50px rgba(0,0,0,.25);
 }
   .logo{display:flex;align-items:center;gap:12px;margin-bottom:1.75rem}
   .emblem{width:54px;height:54px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
