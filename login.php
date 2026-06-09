@@ -53,10 +53,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'Plus Jakarta Sans',sans-serif;background:linear-gradient(135deg,#0f1d3a 0%,#243570 60%,#1e6fbf 100%);min-height:100vh;display:flex;align-items:center;justify-content:center}
-  .card{background:#fff;border-radius:16px;padding:2.5rem 2rem;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+  .card{
+    background:#fff;
+    border-radius:24px;
+    padding:3rem;
+    width:100%;
+    max-width:600px;
+    box-shadow:0 25px 80px rgba(0,0,0,.25);
+}
   .logo{display:flex;align-items:center;gap:12px;margin-bottom:1.75rem}
   .emblem{width:54px;height:54px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .brand{font-size:22px;font-weight:700;color:#1a2e5a;letter-spacing:.5px}
+  .brand{font-size:22px;font-weight:700;color:#1a2e5a;letter-spacing:.5px}.brand{
+    font-size:34px;
+    font-weight:700;
+}
   .tagline{font-size:10px;color:#9eadc8;margin-top:2px;line-height:1.4}
   .divider{height:1px;background:#e8edf5;margin-bottom:1.5rem}
   h2{font-size:17px;font-weight:700;color:#1a2e5a;margin-bottom:1.5rem}
