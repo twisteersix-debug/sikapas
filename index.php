@@ -1,7 +1,7 @@
 <?php
 // ============================================================
 //  SIKAPAS.RIAU — Dashboard Utama
-//  File: dashboard.php  (ganti nama index.php lama atau jadikan index baru)
+//  File: dashboard.php
 // ============================================================
 require_once 'includes/config.php';
 requireLogin();
@@ -175,8 +175,7 @@ html,body{height:100%;font-family:'Plus Jakarta Sans',sans-serif;background:var(
   border-top:1px solid rgba(255,255,255,.07);
   display:flex;align-items:center;gap:10px;
 }
-.sb-footer-logo{width:36px;height:36px;border-radius:50%;overflow:hidden;flex-shrink:0;background:rgba(255,255,255,.1)}
-.sb-footer-logo img{width:36px;height:36px;object-fit:contain}
+/* ════ PERBAIKAN: hapus .sb-footer-logo agar tidak ada gambar duplikat ════ */
 .sb-footer-text{font-size:9px;color:rgba(255,255,255,.4);line-height:1.6}
 .sb-footer-text strong{display:block;font-size:10px;color:rgba(255,255,255,.6);font-weight:700}
 
@@ -272,21 +271,35 @@ html,body{height:100%;font-family:'Plus Jakarta Sans',sans-serif;background:var(
   width:220px;height:220px;border-radius:50%;
   background:rgba(255,255,255,.04);
 }
-/* Watermark Garuda inside hero */
+
+/* ════ PERBAIKAN WATERMARK ════
+   - z-index:0  → berada di belakang semua elemen hero
+   - Posisi digeser agar tidak menimpa hero-avatar
+   - Ukuran diperkecil sedikit agar proporsional
+*/
 .hero-wm{
-  position:absolute;right:32px;top:50%;transform:translateY(-50%);
-  width:180px;height:180px;opacity:.06;pointer-events:none;
+  position:absolute;
+  left:50%;                    /* tengah horizontal */
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:160px;height:160px;
+  opacity:.05;
+  pointer-events:none;
+  z-index:0;                   /* PALING BELAKANG */
 }
 .hero-wm img{width:100%;height:100%;object-fit:contain;filter:brightness(10)}
 
+/* ════ PERBAIKAN AVATAR ════
+   z-index:2 → selalu di atas watermark
+*/
 .hero-avatar{
   width:64px;height:64px;border-radius:50%;flex-shrink:0;
   background:rgba(255,255,255,.15);border:3px solid rgba(255,255,255,.25);
   display:flex;align-items:center;justify-content:center;
   font-size:26px;font-weight:800;color:#fff;
-  position:relative;z-index:1;
+  position:relative;z-index:2;  /* di atas watermark */
 }
-.hero-body{position:relative;z-index:1;flex:1}
+.hero-body{position:relative;z-index:2;flex:1}
 .hero-greeting{font-size:13px;color:rgba(255,255,255,.7);font-weight:500;margin-bottom:4px}
 .hero-name{font-size:26px;font-weight:800;color:#fff;letter-spacing:.3px;display:flex;align-items:center;gap:10px;margin-bottom:2px}
 .hero-name svg{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:2;flex-shrink:0}
@@ -298,7 +311,7 @@ html,body{height:100%;font-family:'Plus Jakarta Sans',sans-serif;background:var(
   font-size:12px;font-weight:600;color:rgba(255,255,255,.85);font-style:italic;
 }
 .hero-meta{
-  position:relative;z-index:1;
+  position:relative;z-index:2;
   display:flex;gap:0;border-left:1px solid rgba(255,255,255,.12);
   padding-left:28px;margin-left:auto;
 }
@@ -577,11 +590,8 @@ html,body{height:100%;font-family:'Plus Jakarta Sans',sans-serif;background:var(
     Bantuan
   </a>
 
-  <!-- Sidebar footer -->
+  <!-- ════ Sidebar footer: hanya teks, tanpa gambar duplikat ════ -->
   <div class="sb-footer">
-    <div class="sb-footer-logo">
-      <img src="logo.png" alt="" onerror="this.style.display='none'">
-    </div>
     <div class="sb-footer-text">
       <strong>KEMENTERIAN IMIGRASI<br>DAN PEMASYARAKATAN</strong>
       REPUBLIK INDONESIA<br>
@@ -645,10 +655,16 @@ html,body{height:100%;font-family:'Plus Jakarta Sans',sans-serif;background:var(
 
     <!-- HERO BANNER -->
     <div class="hero">
+
+      <!-- ════ WATERMARK: ditempatkan PERTAMA agar berada di belakang secara HTML stacking,
+           diperkuat dengan z-index:0 via CSS ════ -->
       <div class="hero-wm">
         <img src="logo.png" alt="" onerror="this.style.display='none'">
       </div>
+
+      <!-- ════ LOGO SDM (avatar inisial): z-index:2, selalu di atas watermark ════ -->
       <div class="hero-avatar"><?= htmlspecialchars($user['inisial'] ?? 'A') ?></div>
+
       <div class="hero-body">
         <div class="hero-greeting">Selamat Datang Kembali,</div>
         <div class="hero-name">
@@ -835,7 +851,7 @@ html,body{height:100%;font-family:'Plus Jakarta Sans',sans-serif;background:var(
 
     </div><!-- /grid-3 -->
 
-    <!-- ROW: Satker bars + Kelengkapan + Pensiun -->
+    <!-- ROW: Satker bars + Kelengkapan + Aktivitas -->
     <div class="grid-3" style="margin-bottom:20px">
 
       <!-- Satker bar -->
@@ -875,7 +891,6 @@ html,body{height:100%;font-family:'Plus Jakarta Sans',sans-serif;background:var(
           <a href="pegawai_satker.php" class="card-link">Lihat Detail</a>
         </div>
         <?php
-        // Hitung kelengkapan field
         $total = max(1, $totalPegawai);
         $hasNip     = $db->query("SELECT COUNT(*) FROM pegawai WHERE nip IS NOT NULL AND nip!='' ")->fetchColumn();
         $hasJabatan = $db->query("SELECT COUNT(*) FROM pegawai WHERE jabatan IS NOT NULL AND jabatan!='' ")->fetchColumn();
@@ -1014,7 +1029,6 @@ function toggleSidebar() {
 function toggleSub(id, el) {
   const sub = document.getElementById(id);
   const isOpen = sub.classList.contains('open');
-  // close all
   document.querySelectorAll('.nav-sub').forEach(s => s.classList.remove('open'));
   document.querySelectorAll('.nav-arrow').forEach(a => a.style.transform = '');
   if (!isOpen) {
