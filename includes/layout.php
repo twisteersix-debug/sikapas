@@ -371,7 +371,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
           <div style="padding:14px 16px 10px;border-bottom:1px solid var(--gray-100)">
             <div style="font-size:13px;font-weight:700;color:var(--gray-800)"><?= htmlspecialchars($user['nama'] ?? '') ?></div>
             <div style="font-size:11px;color:var(--gray-400)"><?= isAdmin() ? 'Administrator' : ucfirst($user['role'] ?? '') ?></div>
-            <?php if ($_userSatker): ?>
+            <?php if (!empty($_userSatker ?? '')): ?>
             <div style="font-size:11px;color:var(--blue);font-weight:600;margin-top:2px">🏢 <?= htmlspecialchars($_userSatker) ?></div>
             <?php endif; ?>
           </div>
