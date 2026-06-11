@@ -27,7 +27,7 @@ if ($act === 'tambah') {
             $error = "Satker dengan nama '$nama' sudah ada.";
         } else {
             $db->prepare("INSERT INTO satker (nama, kode, alamat) VALUES (?,?,?)")
-               ->execute([$nama, $kode, $alamat]);
+               ->execute([$nama, $kode ?: null, $alamat ?: null]);
             $success = "Satker '$nama' berhasil ditambahkan.";
         }
     }
@@ -42,7 +42,7 @@ if ($act === 'edit') {
         $error = 'Nama satker wajib diisi.';
     } else {
         $db->prepare("UPDATE satker SET nama=?, kode=?, alamat=? WHERE id=?")
-           ->execute([$nama, $kode, $alamat, $id]);
+           ->execute([$nama, $kode ?: null, $alamat ?: null, $id]);
         $success = "Satker '$nama' berhasil diupdate.";
     }
 }
@@ -60,8 +60,19 @@ if ($act === 'hapus') {
     }
 }
 
+// Cek kolom yang tersedia di tabel satker
+$cols = $db->query("SHOW COLUMNS FROM satker")->fetchAll(PDO::FETCH_COLUMN);
+$hasKode   = in_array('kode',   $cols);
+$hasAlamat = in_array('alamat', $cols);
+
+// Tambah kolom kode/alamat jika belum ada
+if (!$hasKode)   $db->exec("ALTER TABLE satker ADD COLUMN kode VARCHAR(30) NULL");
+if (!$hasAlamat) $db->exec("ALTER TABLE satker ADD COLUMN alamat VARCHAR(255) NULL");
+
 $satkers = $db->query("
-    SELECT s.id, s.nama, s.kode, s.alamat,
+    SELECT s.id, s.nama,
+           IFNULL(s.kode,'')   AS kode,
+           IFNULL(s.alamat,'') AS alamat,
            COUNT(p.id)              AS jml_pegawai,
            SUM(p.status='Aktif')   AS jml_aktif
     FROM satker s
