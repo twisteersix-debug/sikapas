@@ -34,12 +34,16 @@ $pageTitle='Kelola Satker'; $activeMenu='satker';
 include 'includes/layout.php';
 ?>
 
-<div class="page-header">
-  <div class="page-header-left">
-    <div class="ph-title"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Kelola Satker</div>
-    <div class="ph-sub">Manajemen Satuan Kerja</div>
+<!-- Page Header -->
+<div class="page-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+  <div>
+    <h1>
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Kelola Satker
+    </h1>
+    <p>Manajemen Satuan Kerja</p>
   </div>
-  <div class="ph-actions">
+  <div>
     <button class="btn btn-primary" onclick="openModal('modal-tambah')">
       <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Tambah Satker
@@ -51,22 +55,44 @@ include 'includes/layout.php';
 <?php if($success): ?><div class="alert alert-success"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><?= htmlspecialchars($success) ?></div><?php endif; ?>
 
 <!-- Stats mini -->
-<div class="stat-mini-row">
-  <div class="stat-mini">
-    <div class="stat-mini-icon si-blue"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
-    <div><div class="stat-mini-val"><?= count($satkers) ?></div><div class="stat-mini-lbl">Total Satker</div></div>
+<div style="display:flex;gap:16px;margin-bottom:24px;flex-wrap:wrap">
+  <div class="card" style="display:flex;align-items:center;gap:14px;padding:16px 20px;flex:1;min-width:160px">
+    <div style="width:44px;height:44px;border-radius:10px;background:var(--blue-pale);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--blue);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </div>
+    <div>
+      <div style="font-size:26px;font-weight:800;color:var(--navy);line-height:1"><?= count($satkers) ?></div>
+      <div style="font-size:12px;color:var(--gray-400);margin-top:2px">Total Satker</div>
+    </div>
   </div>
-  <div class="stat-mini">
-    <div class="stat-mini-icon si-green"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
-    <div><div class="stat-mini-val"><?= array_sum(array_column($satkers,'jml_pegawai')) ?></div><div class="stat-mini-lbl">Total Pegawai</div></div>
+  <div class="card" style="display:flex;align-items:center;gap:14px;padding:16px 20px;flex:1;min-width:160px">
+    <div style="width:44px;height:44px;border-radius:10px;background:var(--green-pale);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--green);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+    </div>
+    <div>
+      <div style="font-size:26px;font-weight:800;color:var(--navy);line-height:1"><?= array_sum(array_column($satkers,'jml_pegawai')) ?></div>
+      <div style="font-size:12px;color:var(--gray-400);margin-top:2px">Total Pegawai</div>
+    </div>
   </div>
 </div>
 
+<!-- Tabel Satker -->
 <div class="card">
-  <div class="card-head"><span class="card-title">Daftar Satuan Kerja</span></div>
-  <div class="tbl-wrap">
-    <table class="sikapas-tbl">
-      <thead><tr><th>No</th><th>Nama Satker</th><th>Kode</th><th>Alamat</th><th>Jml Pegawai</th><th>Aksi</th></tr></thead>
+  <div class="card-head">
+    <span class="card-title">Daftar Satuan Kerja</span>
+  </div>
+  <div class="table-wrap">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Nama Satker</th>
+          <th>Kode</th>
+          <th>Alamat</th>
+          <th>Jml Pegawai</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
       <tbody>
         <?php foreach ($satkers as $i=>$s): ?>
         <tr>
@@ -85,7 +111,9 @@ include 'includes/layout.php';
           </td>
         </tr>
         <?php endforeach; ?>
-        <?php if(empty($satkers)): ?><tr><td colspan="6" class="loading">Belum ada data satker</td></tr><?php endif; ?>
+        <?php if(empty($satkers)): ?>
+        <tr><td colspan="6" class="loading">Belum ada data satker</td></tr>
+        <?php endif; ?>
       </tbody>
     </table>
   </div>
@@ -94,16 +122,30 @@ include 'includes/layout.php';
 <!-- Modal Tambah -->
 <div class="modal-overlay" id="modal-tambah" onclick="closeModalOutside(event,'modal-tambah')">
   <div class="modal">
-    <div class="modal-head"><span class="modal-title">➕ Tambah Satker</span><button class="modal-close" onclick="closeModal('modal-tambah')">✕</button></div>
-    <form method="POST"><div class="modal-body">
+    <div class="modal-header">
+      <span class="modal-title">➕ Tambah Satker</span>
+      <button class="modal-close" onclick="closeModal('modal-tambah')">✕</button>
+    </div>
+    <form method="POST">
       <input type="hidden" name="act" value="tambah">
       <div class="form-grid">
-        <div class="form-group full"><label class="form-label">Nama Satker *</label><input type="text" name="nama" class="form-control" placeholder="Nama satuan kerja" required></div>
-        <div class="form-group"><label class="form-label">Kode Satker</label><input type="text" name="kode" class="form-control" placeholder="Kode (opsional)"></div>
-        <div class="form-group"><label class="form-label">Alamat</label><input type="text" name="alamat" class="form-control" placeholder="Alamat satker"></div>
+        <div class="form-group full">
+          <label class="form-label">Nama Satker *</label>
+          <input type="text" name="nama" class="form-control" placeholder="Nama satuan kerja" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Kode Satker</label>
+          <input type="text" name="kode" placeholder="Kode (opsional)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Alamat</label>
+          <input type="text" name="alamat" placeholder="Alamat satker">
+        </div>
       </div>
-    </div>
-    <div class="modal-foot"><button type="button" class="btn btn-outline" onclick="closeModal('modal-tambah')">Batal</button><button type="submit" class="btn btn-primary">Simpan</button></div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modal-tambah')">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan</button>
+      </div>
     </form>
   </div>
 </div>
@@ -111,28 +153,43 @@ include 'includes/layout.php';
 <!-- Modal Edit -->
 <div class="modal-overlay" id="modal-edit" onclick="closeModalOutside(event,'modal-edit')">
   <div class="modal">
-    <div class="modal-head"><span class="modal-title">✏️ Edit Satker</span><button class="modal-close" onclick="closeModal('modal-edit')">✕</button></div>
-    <form method="POST"><div class="modal-body">
+    <div class="modal-header">
+      <span class="modal-title">✏️ Edit Satker</span>
+      <button class="modal-close" onclick="closeModal('modal-edit')">✕</button>
+    </div>
+    <form method="POST">
       <input type="hidden" name="act" value="edit">
       <input type="hidden" name="id" id="edit-id">
       <div class="form-grid">
-        <div class="form-group full"><label class="form-label">Nama Satker *</label><input type="text" name="nama" id="edit-nama" class="form-control" required></div>
-        <div class="form-group"><label class="form-label">Kode</label><input type="text" name="kode" id="edit-kode" class="form-control"></div>
-        <div class="form-group"><label class="form-label">Alamat</label><input type="text" name="alamat" id="edit-alamat" class="form-control"></div>
+        <div class="form-group full">
+          <label class="form-label">Nama Satker *</label>
+          <input type="text" name="nama" id="edit-nama" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Kode</label>
+          <input type="text" name="kode" id="edit-kode">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Alamat</label>
+          <input type="text" name="alamat" id="edit-alamat">
+        </div>
       </div>
-    </div>
-    <div class="modal-foot"><button type="button" class="btn btn-outline" onclick="closeModal('modal-edit')">Batal</button><button type="submit" class="btn btn-primary">Simpan</button></div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modal-edit')">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan</button>
+      </div>
     </form>
   </div>
 </div>
 
 <script>
 function openEditSatker(s) {
-  document.getElementById('edit-id').value    = s.id;
-  document.getElementById('edit-nama').value  = s.nama;
-  document.getElementById('edit-kode').value  = s.kode||'';
-  document.getElementById('edit-alamat').value= s.alamat||'';
+  document.getElementById('edit-id').value     = s.id;
+  document.getElementById('edit-nama').value   = s.nama;
+  document.getElementById('edit-kode').value   = s.kode  || '';
+  document.getElementById('edit-alamat').value = s.alamat || '';
   openModal('modal-edit');
 }
 </script>
-<?php include 'includes/layout_close.php'; ?>
+
+<?php layoutFooter(); ?>
