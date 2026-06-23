@@ -2,47 +2,108 @@
 require_once 'includes/config.php';
 requireLogin();
 if (!isAdmin()) { header('Location: dashboard.php'); exit; }
-$user = currentUser();
-$db   = getDB();
-$satkerList = $db->query("SELECT id,nama FROM satker ORDER BY nama")->fetchAll();
-$error=''; $success='';
-$act = $_POST['act']??'';
+ $user = currentUser();
+ $db   = getDB();
+ $satkerList = $db->query("SELECT id,nama FROM satker ORDER BY nama")->fetchAll();
+ $error=''; $success='';
+ $act = $_POST['act']??'';
 
 if ($act==='tambah') {
-    $nama=trim($_POST['nama']??''); $uname=trim($_POST['username']??''); $pass=$_POST['password']??''; $role=$_POST['role']??'operator'; $sid=$_POST['satker_id']?:null;
-    if (!$nama||!$uname||!$pass) { $error='Semua field wajib diisi.'; }
-    else {
-        $cek=$db->prepare("SELECT id FROM users WHERE username=?"); $cek->execute([$uname]);
-        if ($cek->fetch()) { $error='Username sudah digunakan.'; }
-        else { $db->prepare("INSERT INTO users (nama,username,password,role,satker_id) VALUES (?,?,?,?,?)")->execute([$nama,$uname,password_hash($pass,PASSWORD_BCRYPT),$role,$sid]); $success="User '$uname' berhasil ditambahkan."; }
+    $nama  = trim($_POST['nama']??'');
+    $uname = trim($_POST['username']??'');
+    $pass  = $_POST['password']??'';
+    $role  = $_POST['role']??'operator';
+    // FIX: pakai ?? bukan ?: agar tidak trigger Undefined index
+    $sid   = (!empty($_POST['satker_id'])) ? $_POST['satker_id'] : null;
+
+    if (!$nama || !$uname || !$pass) {
+        $error = 'Semua field wajib diisi.';
     }
-}
-if ($act==='edit') {
-    $id=$_POST['id']??''; $nama=trim($_POST['nama']??''); $uname=trim($_POST['username']??''); $role=$_POST['role']??'operator'; $pass=$_POST['password']??''; $sid=$_POST['satker_id']?:null;
-    if (!$nama||!$uname) { $error='Nama dan username wajib diisi.'; }
+    // FIX: validasi satker wajib untuk operator/viewer
+    elseif (in_array($role, ['operator','viewer']) && empty($sid)) {
+        $error = 'Satker wajib dipilih untuk role ' . ucfirst($role) . '.';
+    }
     else {
-        $cek=$db->prepare("SELECT id FROM users WHERE username=? AND id!=?"); $cek->execute([$uname,$id]);
-        if ($cek->fetch()) { $error='Username sudah digunakan.'; }
-        else {
-            if ($pass) $db->prepare("UPDATE users SET nama=?,username=?,password=?,role=?,satker_id=? WHERE id=?")->execute([$nama,$uname,password_hash($pass,PASSWORD_BCRYPT),$role,$sid,$id]);
-            else $db->prepare("UPDATE users SET nama=?,username=?,role=?,satker_id=? WHERE id=?")->execute([$nama,$uname,$role,$sid,$id]);
-            $success="User '$uname' berhasil diupdate.";
+        $cek = $db->prepare("SELECT id FROM users WHERE username=?");
+        $cek->execute([$uname]);
+        if ($cek->fetch()) {
+            $error = 'Username sudah digunakan.';
+        } else {
+            $db->prepare("INSERT INTO users (nama,username,password,role,satker_id) VALUES (?,?,?,?,?)")
+               ->execute([$nama, $uname, password_hash($pass, PASSWORD_BCRYPT), $role, $sid]);
+            $success = "User '$uname' berhasil ditambahkan.";
         }
     }
 }
-if ($act==='hapus') {
-    $id=$_POST['id']??'';
-    if ($id==$_SESSION['user_id']) { $error='Tidak bisa menghapus akun sendiri.'; }
-    else { $db->prepare("DELETE FROM users WHERE id=?")->execute([$id]); $success='User berhasil dihapus.'; }
-}
-if ($act==='reset_pass') {
-    $id=$_POST['id']??'';
-    $db->prepare("UPDATE users SET password=? WHERE id=?")->execute([password_hash('sikapas123',PASSWORD_BCRYPT),$id]);
-    $success='Password direset ke: sikapas123';
-}
-$users = $db->query("SELECT u.*,s.nama AS satker_nama FROM users u LEFT JOIN satker s ON s.id=u.satker_id ORDER BY u.created_at DESC")->fetchAll();
 
-$pageTitle='Kelola User'; $activeMenu='users';
+if ($act==='edit') {
+    $id    = $_POST['id']??'';
+    $nama  = trim($_POST['nama']??'');
+    $uname = trim($_POST['username']??'');
+    $role  = $_POST['role']??'operator';
+    $pass  = $_POST['password']??'';
+    // FIX: pakai ?? bukan ?:
+    $sid   = (!empty($_POST['satker_id'])) ? $_POST['satker_id'] : null;
+
+    if (!$nama || !$uname) {
+        $error = 'Nama dan username wajib diisi.';
+    }
+    // FIX: validasi satker wajib untuk operator/viewer
+    elseif (in_array($role, ['operator','viewer']) && empty($sid)) {
+        $error = 'Satker wajib dipilih untuk role ' . ucfirst($role) . '.';
+    }
+    else {
+        $cek = $db->prepare("SELECT id FROM users WHERE username=? AND id!=?");
+        $cek->execute([$uname, $id]);
+        if ($cek->fetch()) {
+            $error = 'Username sudah digunakan.';
+        } else {
+            if ($pass) {
+                $db->prepare("UPDATE users SET nama=?,username=?,password=?,role=?,satker_id=? WHERE id=?")
+                   ->execute([$nama, $uname, password_hash($pass, PASSWORD_BCRYPT), $role, $sid, $id]);
+            } else {
+                $db->prepare("UPDATE users SET nama=?,username=?,role=?,satker_id=? WHERE id=?")
+                   ->execute([$nama, $uname, $role, $sid, $id]);
+            }
+            $success = "User '$uname' berhasil diupdate.";
+        }
+    }
+}
+
+if ($act==='hapus') {
+    $id = $_POST['id']??'';
+    if ($id == $_SESSION['user_id']) {
+        $error = 'Tidak bisa menghapus akun sendiri.';
+    } else {
+        // FIX: cek dulu apakah user ada
+        $cek = $db->prepare("SELECT id FROM users WHERE id=?");
+        $cek->execute([$id]);
+        if ($cek->fetch()) {
+            $db->prepare("DELETE FROM users WHERE id=?")->execute([$id]);
+            $success = 'User berhasil dihapus.';
+        } else {
+            $error = 'User tidak ditemukan.';
+        }
+    }
+}
+
+if ($act==='reset_pass') {
+    $id = $_POST['id']??'';
+    // FIX: cek dulu apakah user ada
+    $cek = $db->prepare("SELECT id FROM users WHERE id=?");
+    $cek->execute([$id]);
+    if ($cek->fetch()) {
+        $db->prepare("UPDATE users SET password=? WHERE id=?")
+           ->execute([password_hash('sikapas123', PASSWORD_BCRYPT), $id]);
+        $success = 'Password direset ke: sikapas123';
+    } else {
+        $error = 'User tidak ditemukan.';
+    }
+}
+
+ $users = $db->query("SELECT u.*,s.nama AS satker_nama FROM users u LEFT JOIN satker s ON s.id=u.satker_id ORDER BY u.created_at DESC")->fetchAll();
+
+ $pageTitle='Kelola User'; $activeMenu='users';
 include 'includes/layout.php';
 ?>
 <div class="page-header">
@@ -81,15 +142,15 @@ include 'includes/layout.php';
             <span class="badge <?= $rc[$u['role']]??'badge-gray' ?>"><?= ucfirst($u['role']) ?></span>
           </td>
           <td>
-            <?php if($u['role']==='admin'): ?><span class="badge badge-blue">🔓 Semua Satker</span>
-            <?php elseif($u['satker_nama']): ?><span class="badge badge-gray">🏢 <?= htmlspecialchars($u['satker_nama']) ?></span>
-            <?php else: ?><span style="font-size:11px;color:var(--gray-400)">Belum ditentukan</span><?php endif; ?>
+            <?php if($u['role']==='admin'): ?><span class="badge badge-blue">Semua Satker</span>
+            <?php elseif($u['satker_nama']): ?><span class="badge badge-gray"><?= htmlspecialchars($u['satker_nama']) ?></span>
+            <?php else: ?><span style="font-size:11px;color:var(--red-500);font-weight:600">Belum ditentukan</span><?php endif; ?>
           </td>
           <td style="font-size:12px;color:var(--gray-600)"><?= date('d M Y',strtotime($u['created_at'])) ?></td>
           <td style="white-space:nowrap;display:flex;gap:6px;flex-wrap:wrap">
-            <button class="btn btn-sm btn-outline" onclick='openEditUser(<?= json_encode($u) ?>)'>Edit</button>
+            <button class="btn btn-sm btn-outline" onclick='openEditUser(<?= htmlspecialchars(json_encode($u), ENT_QUOTES, 'UTF-8') ?>)'>Edit</button>
             <?php if($u['id']!=$_SESSION['user_id']): ?>
-            <form method="POST" style="display:inline" onsubmit="return confirm('Reset password?')">
+            <form method="POST" style="display:inline" onsubmit="return confirm('Reset password user ini?')">
               <input type="hidden" name="act" value="reset_pass"><input type="hidden" name="id" value="<?= $u['id'] ?>">
               <button type="submit" class="btn btn-sm btn-warning">Reset Pass</button>
             </form>
@@ -109,7 +170,7 @@ include 'includes/layout.php';
 <!-- Modal Tambah -->
 <div class="modal-overlay" id="modal-tambah" onclick="closeModalOutside(event,'modal-tambah')">
   <div class="modal">
-    <div class="modal-head"><span class="modal-title">➕ Tambah User</span><button class="modal-close" onclick="closeModal('modal-tambah')">✕</button></div>
+    <div class="modal-head"><span class="modal-title">Tambah User</span><button class="modal-close" onclick="closeModal('modal-tambah')">&times;</button></div>
     <form method="POST"><div class="modal-body">
       <input type="hidden" name="act" value="tambah">
       <div class="form-grid">
@@ -117,9 +178,9 @@ include 'includes/layout.php';
         <div class="form-group"><label class="form-label">Username *</label><input type="text" name="username" class="form-control" required></div>
         <div class="form-group"><label class="form-label">Password *</label><input type="password" name="password" class="form-control" required></div>
         <div class="form-group"><label class="form-label">Role</label>
-          <select name="role" class="form-control"><option value="operator">Operator</option><option value="viewer">Viewer</option><option value="admin">Admin</option></select></div>
-        <div class="form-group full"><label class="form-label">Satker (Wajib untuk Operator/Viewer)</label>
-          <select name="satker_id" class="form-control"><option value="">— Semua Satker (Admin) —</option><?php foreach($satkerList as $s): ?><option value="<?= $s['id'] ?>"><?= htmlspecialchars($s['nama']) ?></option><?php endforeach; ?></select></div>
+          <select name="role" id="add-role" class="form-control" onchange="toggleSatkerRequired('add')"><option value="operator">Operator</option><option value="viewer">Viewer</option><option value="admin">Admin</option></select></div>
+        <div class="form-group full"><label class="form-label" id="add-satker-label">Satker (Wajib untuk Operator/Viewer)</label>
+          <select name="satker_id" id="add-satker" class="form-control" required><option value="">-- Pilih Satker --</option><?php foreach($satkerList as $s): ?><option value="<?= $s['id'] ?>"><?= htmlspecialchars($s['nama']) ?></option><?php endforeach; ?></select></div>
       </div>
     </div>
     <div class="modal-foot"><button type="button" class="btn btn-outline" onclick="closeModal('modal-tambah')">Batal</button><button type="submit" class="btn btn-primary">Tambah</button></div>
@@ -130,7 +191,7 @@ include 'includes/layout.php';
 <!-- Modal Edit -->
 <div class="modal-overlay" id="modal-edit" onclick="closeModalOutside(event,'modal-edit')">
   <div class="modal">
-    <div class="modal-head"><span class="modal-title">✏️ Edit User</span><button class="modal-close" onclick="closeModal('modal-edit')">✕</button></div>
+    <div class="modal-head"><span class="modal-title">Edit User</span><button class="modal-close" onclick="closeModal('modal-edit')">&times;</button></div>
     <form method="POST"><div class="modal-body">
       <input type="hidden" name="act" value="edit">
       <input type="hidden" name="id" id="eu-id">
@@ -138,23 +199,45 @@ include 'includes/layout.php';
         <div class="form-group"><label class="form-label">Nama Lengkap *</label><input type="text" name="nama" id="eu-nama" class="form-control" required></div>
         <div class="form-group"><label class="form-label">Username *</label><input type="text" name="username" id="eu-username" class="form-control" required></div>
         <div class="form-group"><label class="form-label">Password Baru <small style="color:var(--gray-400)">(kosongkan jika tidak diubah)</small></label><input type="password" name="password" class="form-control" placeholder="Password baru..."></div>
-        <div class="form-group"><label class="form-label">Role</label><select name="role" id="eu-role" class="form-control"><option value="operator">Operator</option><option value="viewer">Viewer</option><option value="admin">Admin</option></select></div>
-        <div class="form-group full"><label class="form-label">Satker</label>
-          <select name="satker_id" id="eu-satker" class="form-control"><option value="">— Semua Satker (Admin) —</option><?php foreach($satkerList as $s): ?><option value="<?= $s['id'] ?>"><?= htmlspecialchars($s['nama']) ?></option><?php endforeach; ?></select></div>
+        <div class="form-group"><label class="form-label">Role</label><select name="role" id="eu-role" class="form-control" onchange="toggleSatkerRequired('edit')"><option value="operator">Operator</option><option value="viewer">Viewer</option><option value="admin">Admin</option></select></div>
+        <div class="form-group full"><label class="form-label" id="edit-satker-label">Satker (Wajib untuk Operator/Viewer)</label>
+          <select name="satker_id" id="eu-satker" class="form-control"><option value="">-- Pilih Satker --</option><?php foreach($satkerList as $s): ?><option value="<?= $s['id'] ?>"><?= htmlspecialchars($s['nama']) ?></option><?php endforeach; ?></select></div>
       </div>
     </div>
     <div class="modal-foot"><button type="button" class="btn btn-outline" onclick="closeModal('modal-edit')">Batal</button><button type="submit" class="btn btn-primary">Simpan</button></div>
     </form>
   </div>
 </div>
+
 <script>
 function openEditUser(u) {
-  document.getElementById('eu-id').value      = u.id;
-  document.getElementById('eu-nama').value    = u.nama;
-  document.getElementById('eu-username').value= u.username;
-  document.getElementById('eu-role').value    = u.role;
-  document.getElementById('eu-satker').value  = u.satker_id||'';
+  document.getElementById('eu-id').value       = u.id;
+  document.getElementById('eu-nama').value     = u.nama;
+  document.getElementById('eu-username').value = u.username;
+  document.getElementById('eu-role').value     = u.role;
+  document.getElementById('eu-satker').value   = u.satker_id || '';
+  toggleSatkerRequired('edit');
   openModal('modal-edit');
 }
+
+// Toggle required satker berdasarkan role yang dipilih
+function toggleSatkerRequired(mode) {
+  var roleEl  = document.getElementById(mode + '-role');
+  var satEl   = document.getElementById(mode === 'add' ? 'add-satker' : 'eu-satker');
+  var labelEl = document.getElementById(mode + '-satker-label');
+  var role    = roleEl.value;
+
+  if (role === 'admin') {
+    satEl.removeAttribute('required');
+    labelEl.textContent = 'Satker (Opsional untuk Admin)';
+  } else {
+    satEl.setAttribute('required', 'required');
+    labelEl.textContent = 'Satker (Wajib untuk ' + role.charAt(0).toUpperCase() + role.slice(1) + ')';
+  }
+}
+// Inisialisasi saat pertama kali buka modal tambah
+document.querySelector('#modal-tambah form').addEventListener('reset', function() {
+  setTimeout(function() { toggleSatkerRequired('add'); }, 10);
+});
 </script>
 <?php include 'includes/layout_close.php'; ?>
