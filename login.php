@@ -365,7 +365,7 @@ body {
     <!-- Tagline -->
     <div class="login-footer">
         <p><strong>Satu Sikap, Satu Data PAS Riau</strong><br>
-        Kanwil Kementerian Hukum dan HAM Riau</p>
+        Kanwil Direktorat Jenderal Pemasyarakatan Riau</p>
     </div>
 </div>
 
